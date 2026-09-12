@@ -81,6 +81,8 @@ CMakeLists.txt.user*
 .rcc/
 .uic/
 /build*/
+/install*/
+/log*/
 /.vscode/
 /.cache/
 # Generated Doxygen output
