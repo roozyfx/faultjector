@@ -79,7 +79,12 @@ injections:
   - topic: /odom            # republished under this name
     source: /odom_raw       # subscribed here; default is <topic>_raw
     faults:
-      - delay: { mean: 200ms, jitter: 20ms }
+      - id: odom_lag        # names this fault in logs, reports and assertions
+        type: delay
+        params: { mean: 200ms, jitter: 20ms }
+        window:
+          start: { event: goal_accepted, after: 5s }
+          end:   { duration: 15s }
 
 record: [/odom, /scan, /tf, /cmd_vel, /plan]
 
