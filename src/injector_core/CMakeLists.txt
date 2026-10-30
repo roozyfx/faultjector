@@ -4,7 +4,10 @@ project(injector_core VERSION 0.1.0 LANGUAGES CXX)
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-add_library(injector_core include/fault_parameters.h)
+find_package(yaml-cpp REQUIRED)
+
+add_library(injector_core src/scenario_parser.cpp
+    include/fault_parameters.h)
 add_library(injector_core::injector_core ALIAS injector_core)
 set_target_properties(injector_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
@@ -12,6 +15,9 @@ target_compile_features(injector_core PUBLIC cxx_std_23) # Require C++23
 target_include_directories(injector_core PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+
+# keep yaml-cpp to this library only
+target_link_libraries(injector_core PRIVATE yaml-cpp::yaml-cpp)
 
 install(TARGETS injector_core EXPORT injector_coreTargets)
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
