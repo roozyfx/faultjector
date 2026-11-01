@@ -7,6 +7,7 @@
 #include <optional>
 #include <print>
 #include <string>
+#include <utility>  // for std::unreachable
 
 #include "utils.h"
 #include "yaml-cpp/yaml.h"
@@ -51,6 +52,28 @@ Duration to_duration(const YAML::Node& node) {
                                       "not a valid time duration format");
 }
 
+Duration to_time_offset(const YAML::Node& node) {
+  const std::string str{node.as<std::string>()};
+  int64_t value;
+  auto [unit, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
+  if (ec != std::errc()) {
+    throw YAML::RepresentationException(node.Mark(), "invalid value");
+  }
+  if (std::strcmp(unit, "min") == 0) {
+    return std::chrono::minutes(value);
+  } else if (std::strcmp(unit, "s") == 0) {
+    return std::chrono::seconds(value);
+  } else if (std::strcmp(unit, "ms") == 0) {
+    return std::chrono::milliseconds(value);
+  } else if (std::strcmp(unit, "us") == 0) {
+    return std::chrono::microseconds(value);
+  } else if (std::strcmp(unit, "ns") == 0) {
+    return std::chrono::nanoseconds(value);
+  }
+  throw YAML::RepresentationException(node.Mark(),
+                                      "not a valid time duration format");
+}
+
 namespace YAML {
 template <>
 struct convert<WindowStart> {
@@ -61,9 +84,10 @@ struct convert<WindowStart> {
   };
 
   static bool decode(const Node& node, WindowStart& win_start) {
+    check_keys(node, {"time", "event", "after"});
     const bool is_at_time{node["time"]};
     const bool is_after_event{(node["after"] && node["event"])};
-    if (!node.IsMap() && !(is_at_time || is_after_event)) return false;
+    if (!node.IsMap() || !(is_at_time || is_after_event)) return false;
 
     if (is_at_time) {
       AtTime at_time;
@@ -89,8 +113,9 @@ struct convert<WindowEnd> {
   };
 
   static bool decode(const Node& node, WindowEnd& win_end) {
+    check_keys(node, {"time", "duration"});
     // nodes
-    if (!node.IsMap() && !(node["duration"] || node["time"])) return false;
+    if (!node.IsMap() || !(node["duration"] || node["time"])) return false;
 
     if (node["time"]) {
       AtTime at_time;
@@ -115,6 +140,7 @@ struct convert<Window> {
   };
 
   static bool decode(const Node& node, Window& win) {
+    check_keys(node, {"start", "end"});
     if (!node.IsMap()) return false;
 
     // If no window.start is specified, default is from the beginning
@@ -135,6 +161,7 @@ struct convert<Fault> {
   }
 
   static bool decode(const Node& node, Fault& fault) {
+    check_keys(node, {"id", "type", "params", "window"});
     // Since both 'start' and 'end' are optional in 'window', window can be
     // non-existant and it'd still be valid scenario file
     if (!node.IsMap() || !node["id"] || !node["params"]) return false;
@@ -153,9 +180,7 @@ struct convert<Fault> {
         p.distribution = std::nullopt;
 
       fault.params = p;
-    }
-
-    if (fault.type.compare("drop") == 0) {
+    } else if (fault.type.compare("drop") == 0) {
       check_keys(params, {"probability", "every_nth"});
       if (params["probability"] && params["every_nth"])
         throw YAML::InvalidNode(
@@ -174,18 +199,14 @@ struct convert<Fault> {
                                               "Should be a positive integer.");
       }
       fault.params = p;
-    }
-
-    if (fault.type.compare("duplicate") == 0) {
+    } else if (fault.type.compare("duplicate") == 0) {
       check_keys(params, {"probability", "spacing"});
       DuplicateParams p;
       p.probability = Probability(params["probability"].as<double>());
       p.spacing = to_duration(params["spacing"]);
 
       fault.params = p;
-    }
-
-    if (fault.type.compare("reorder") == 0) {
+    } else if (fault.type.compare("reorder") == 0) {
       check_keys(params, {"window_size", "probability"});
       ReorderParams p;
       p.window_size = params["window_size"].as<size_t>();
@@ -195,15 +216,17 @@ struct convert<Fault> {
       p.probability = Probability(params["probability"].as<double>());
 
       fault.params = p;
-    }
-
-    if (fault.type.compare("clock_skew") == 0) {
+    } else if (fault.type.compare("clock_skew") == 0) {
       check_keys(params, {"offset"});
       ClockSkewParams p;
-      // FIXME offset can take negative values, but here is only non-negative
-      p.offset = to_duration(params["offset"]);
+      p.offset = to_time_offset(params["offset"]);
 
       fault.params = p;
+    } else {
+      throw YAML::RepresentationException(
+          node.Mark(),
+          "Invalid fault type. Should be one of {delay, drop, duplicate, "
+          "reorder, clock_skew}.");
     }
 
     if (!node["window"]) {
@@ -229,7 +252,9 @@ struct convert<Injection> {
   }
 
   static bool decode(const Node& node, Injection& injection) {
+    check_keys(node, {"topic", "source", "faults"});
     if (!node.IsMap() || !node["topic"] || !node["faults"]) return false;
+
     injection.topic = node["topic"].as<std::string>();
     injection.source = node["source"].as<std::string>(injection.topic + "_raw");
     if (node["faults"]) injection.faults = node["faults"].as<Faults>();
@@ -240,6 +265,7 @@ struct convert<Injection> {
 }  // namespace YAML
 
 std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
+  std::expected<Scenario, std::string> res;
   try {
     // FIXME add "assert"
     // check_keys(root,{"name", "seed", "timeout", "injections", "record",
@@ -255,11 +281,7 @@ std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
     // scenario.assert = root["assert"].as<Assertion>();
     return scenario;
   } catch (const YAML::Exception& e) {
-    std::println(stderr, "{}", e.what());
-    // TODO
-    return std::unexpected(std::format("Error at line: {}", e.what()));
-  } catch (const std::exception& e) {
-    throw e;
+    return std::unexpected(std::format("{}", e.what()));
   }
 }
 
@@ -270,9 +292,9 @@ std::expected<Scenario, std::string> parse_scenario(
 
     return parse_root(root);
   } catch (const YAML::Exception& e) {
-    std::println(stderr, "{}", e.what());
+    return std::unexpected(std::format("{}", e.what()));
   } catch (const std::exception& e) {
-    std::println(stderr, "{}", e.what());
+    return std::unexpected(std::format("{}", e.what()));
   }
-  return std::unexpected("Error!");
+  std::unreachable();
 }
