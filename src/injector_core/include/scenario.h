@@ -34,16 +34,16 @@ assert:
 #include "fault_parameters.h"
 
 struct AtTime {
-  Duration time{};
+  nanoseconds time{};
 };
 
 struct AfterEvent {
   std::string event;
-  Duration after{};
+  nanoseconds after{};
 };
 
 struct ForDuration {
-  Duration duration{};
+  nanoseconds duration{};
 };
 
 using WindowStart = std::variant<AtTime, AfterEvent>;
@@ -86,7 +86,7 @@ struct Assertion {
 struct Scenario {
   std::string name{};
   uint64_t seed{};
-  Duration timeout{};
+  nanoseconds timeout{};
   Injections injections{};
   RecordList record{};
   // FIXME uncomment

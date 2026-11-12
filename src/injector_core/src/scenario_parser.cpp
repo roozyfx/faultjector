@@ -30,7 +30,7 @@ void check_keys(
   }
 }
 
-Duration to_duration(const YAML::Node& node) {
+nanoseconds to_duration(const YAML::Node& node) {
   const std::string str{node.as<std::string>()};
   uint64_t value;
   auto [unit, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
@@ -52,7 +52,7 @@ Duration to_duration(const YAML::Node& node) {
                                       "not a valid time duration format");
 }
 
-Duration to_time_offset(const YAML::Node& node) {
+nanoseconds to_time_offset(const YAML::Node& node) {
   const std::string str{node.as<std::string>()};
   int64_t value;
   auto [unit, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
@@ -144,9 +144,10 @@ struct convert<Window> {
     if (!node.IsMap()) return false;
 
     // If no window.start is specified, default is from the beginning
-    win.start = node["start"].as<WindowStart>(AtTime{Duration{0}});
+    win.start = node["start"].as<WindowStart>(AtTime{nanoseconds{0}});
     // If no window.end is specified, default is to the end
-    win.end = node["end"].as<WindowEnd>(AtTime{Duration{Duration::max()}});
+    win.end =
+        node["end"].as<WindowEnd>(AtTime{nanoseconds{nanoseconds::max()}});
 
     return true;
   }
@@ -230,9 +231,9 @@ struct convert<Fault> {
     }
 
     if (!node["window"]) {
-      fault.window.start = AtTime{Duration{0}};
+      fault.window.start = AtTime{nanoseconds{0}};
       // If no window.end is specified, default is to the end
-      fault.window.end = AtTime{Duration{Duration::max()}};
+      fault.window.end = AtTime{nanoseconds{nanoseconds::max()}};
     } else {
       fault.window = node["window"].as<Window>();
     }
