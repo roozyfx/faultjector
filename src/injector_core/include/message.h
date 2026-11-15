@@ -4,17 +4,22 @@
 #include "timestamp.h"
 
 // FIXME
-struct Payload {};
+#include <string>
+struct Payload {
+  std::string temp_str;
+};
 
 struct Emission {
   Timestamp due_time{};
   Payload message{};
-
-  inline bool operator<(const Emission& e) { return due_time < e.due_time; }
 };
+
+bool operator<(const Emission& e1, const Emission& e2);
 
 struct Message {
   Timestamp sensor_time{};
   Payload message{};
 };
+
+Message to_message(const Emission& e);
 #endif  // INJECTOR_CORE_INCLUDE_MESSAGE_H
