@@ -1,5 +1,5 @@
-#ifndef INJECTOR_CORE_INCLUDE_RNG_H_
-#define INJECTOR_CORE_INCLUDE_RNG_H_
+#ifndef INJECTOR_CORE_INCLUDE_RNG_HPP_
+#define INJECTOR_CORE_INCLUDE_RNG_HPP_
 #include <chrono>
 #include <cmath>  // for std::isnan
 #include <concepts>
@@ -89,8 +89,8 @@ class RNG {
   // gaussian distribution for nanoseconds
   using ns = std::chrono::nanoseconds;
   ns gaussian(const ns& mean_ns, const ns& stddev_ns) {
-    const double mean{mean_ns.count()};
-    const double stddev{stddev_ns.count()};
+    const double mean{static_cast<double>(mean_ns.count())};
+    const double stddev{static_cast<double>(stddev_ns.count())};
     if (stddev <= 0 || std::isnan(stddev) || !std::isfinite(stddev)) {
       throw std::invalid_argument("'stddev' must be a positive real number.");
     }
@@ -117,4 +117,4 @@ class RNG {
   Engine engine_;
   uint64_t seed_;
 };
-#endif  // INJECTOR_CORE_INCLUDE_RNG_H_
+#endif  // INJECTOR_CORE_INCLUDE_RNG_HPP_

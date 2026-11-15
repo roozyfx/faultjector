@@ -4,13 +4,14 @@
 
 #include "fault_parameters.h"
 #include "message.h"
-#include "rng.h"
+#include "rng.hpp"
 #include "timestamp.h"
 
 class Perturb {
   std::vector<Emission> buffer_;
-  // RNG<std::mt19937_64> rng_;
 
+  // TODO IMPORTANT: Think if I should deal with emtpy message in the beginning
+  // of each override
  public:
   std::vector<Emission> operator()(const DelayParams& delay,
                                    const uint64_t rng_seed,
@@ -98,4 +99,4 @@ class Perturb {
   }
 };
 
-#endif  // INJECTOR_CORE_INCLUDE_PERTURB_H_
+#endif  // INJECTOR_CORE_INCLUDE_PERTURB_HPP_
