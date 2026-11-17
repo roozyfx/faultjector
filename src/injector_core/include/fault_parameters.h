@@ -1,7 +1,6 @@
 #ifndef INJECTOR_CORE_INCLUDE_FAULT_PARAMETERS_H_
 #define INJECTOR_CORE_INCLUDE_FAULT_PARAMETERS_H_
 
-#include <chrono>
 #include <optional>
 #include <variant>
 

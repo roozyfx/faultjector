@@ -25,50 +25,13 @@ assert:
   - max_cross_track_error: { below: 0.30m, during: odom_lag }
   - max_cross_track_error: { below: 0.10m, after: odom_lag, settle: 5s }
 */
+#include <cstdint>
 #include <map>
-#include <optional>
 #include <string>
-#include <variant>
 #include <vector>
 
-#include "fault_parameters.h"
-
-struct AtTime {
-  nanoseconds time{};
-};
-
-struct AfterEvent {
-  std::string event;
-  nanoseconds after{};
-};
-
-struct ForDuration {
-  nanoseconds duration{};
-};
-
-using WindowStart = std::variant<AtTime, AfterEvent>;
-using WindowEnd = std::variant<AtTime, ForDuration>;
-struct Window {
-  // unset means start from the beginning of simulation
-  std::optional<WindowStart> start;
-  // unset means to the end of simulation
-  std::optional<WindowEnd> end;
-};
-
-struct Fault {
-  std::string id;
-  std::string type;
-  FaultParams params;
-  Window window;
-};
-using Faults = std::vector<Fault>;
-
-struct Injection {
-  std::string topic;
-  std::string source;
-  Faults faults;
-};
-using Injections = std::vector<Injection>;
+#include "core_types.h"
+#include "injection.h"
 
 using RecordList = std::vector<std::string>;
 
