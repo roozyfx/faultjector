@@ -22,4 +22,5 @@ MACRO(add_test test_name)
   gtest_discover_tests(${test_name})
 ENDMACRO()
 
+add_test(test_scenario_parser)
 add_test(test_window)
