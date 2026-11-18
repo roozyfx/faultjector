@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "fault_parameters.h"
+#include "fault_params.h"
 #include "window.h"
 
 struct Fault {

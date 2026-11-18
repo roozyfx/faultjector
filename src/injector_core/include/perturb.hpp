@@ -2,7 +2,7 @@
 #define INJECTOR_CORE_INCLUDE_PERTURB_HPP_
 #include <vector>
 
-#include "fault_parameters.h"
+#include "fault_params.h"
 #include "message.h"
 #include "rng.hpp"
 #include "timestamp.h"

@@ -1,5 +1,5 @@
-#ifndef INJECTOR_CORE_INCLUDE_FAULT_PARAMETERS_H_
-#define INJECTOR_CORE_INCLUDE_FAULT_PARAMETERS_H_
+#ifndef INJECTOR_CORE_INCLUDE_FAULT_PARAMS_H_
+#define INJECTOR_CORE_INCLUDE_FAULT_PARAMS_H_
 
 #include <optional>
 #include <variant>
@@ -50,4 +50,4 @@ struct ClockSkewParams {
 using FaultParams = std::variant<DelayParams, DropParams, DuplicateParams,
                                  ReorderParams, ClockSkewParams>;
 
-#endif  // INJECTOR_CORE_INCLUDE_FAULT_PARAMETERS_H_
+#endif  // INJECTOR_CORE_INCLUDE_FAULT_PARAMS_H_
