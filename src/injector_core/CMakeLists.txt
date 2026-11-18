@@ -1,13 +1,22 @@
 cmake_minimum_required(VERSION 3.40...4.4.2)
-project(injector_core VERSION 0.1.0 LANGUAGES CXX)
+project(injector_core VERSION 0.2.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 find_package(yaml-cpp REQUIRED)
 
-add_library(injector_core src/scenario_parser.cpp
-    include/fault_parameters.h)
+set (SRC
+    include/perturb.hpp
+    include/rng.hpp
+    src/fault_pipeline.cpp
+    src/message.cpp
+    src/scenario_parser.cpp
+    src/window.cpp
+    )
+
+add_library(injector_core ${SRC} )
+
 add_library(injector_core::injector_core ALIAS injector_core)
 set_target_properties(injector_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
