@@ -1,14 +1,12 @@
 #ifndef INJECTOR_CORE_INCLUDE_WINDOW_H_
 #define INJECTOR_CORE_INCLUDE_WINDOW_H_
-#include <map>
 #include <optional>
 #include <string>
 #include <variant>
 
 #include "core_types.h"
+#include "events.h"
 #include "timestamp.h"
-
-using EventTimes = std::map<std::string, Timestamp>;
 
 struct AtTime {
   nanoseconds time{};
