@@ -7,7 +7,7 @@ include(CMakePackageConfigHelpers)
 find_package(yaml-cpp REQUIRED)
 
 set (SRC
-    include/perturb.hpp
+    src/perturb.cpp
     src/rng.cpp
     src/fault_pipe.cpp
     src/message.cpp
