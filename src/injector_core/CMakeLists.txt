@@ -8,8 +8,8 @@ find_package(yaml-cpp REQUIRED)
 
 set (SRC
     include/perturb.hpp
-    include/rng.hpp
-    src/fault_pipeline.cpp
+    src/rng.cpp
+    src/fault_pipe.cpp
     src/message.cpp
     src/scenario_parser.cpp
     src/window.cpp
