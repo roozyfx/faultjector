@@ -17,6 +17,9 @@ class Timestamp {
   }
 
   inline bool operator<(const Timestamp& t1) const { return val_ < t1.value(); }
+  inline bool operator<=(const Timestamp& t1) const {
+    return val_ <= t1.value();
+  }
 };
 
 #endif  // INJECTOR_CORE_INCLUDE_TIMESTAMP_H_
