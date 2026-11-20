@@ -31,16 +31,16 @@ std::optional<Timestamp> Window::handle_start(const EventTimes& events) const {
 }
 
 bool Window::contains(const Timestamp& ts, const EventTimes& events) const {
-  auto start = handle_start(events);
+  auto strt = handle_start(events);
 
-  if (!start.has_value() || ts < start.value()) return false;
+  if (!strt.has_value() || ts < strt.value()) return false;
 
   if (!end) return true;
 
   return std::visit(
       overloaded{[&](const AtTime& t) -> bool { return ts.value() < t.time; },
                  [&](const ForDuration& d) -> bool {
-                   return ts < start.value() + Timestamp(d.duration);
+                   return ts < strt.value() + Timestamp(d.duration);
                  }},
       *end);
 }
