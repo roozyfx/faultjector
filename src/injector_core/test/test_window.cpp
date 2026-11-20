@@ -5,6 +5,7 @@
 #include "timestamp.h"
 #include "window.h"
 using namespace std::chrono_literals;
+using namespace fxcore;
 
 TEST(WindowContains, UnsetWindowIsAlwaysOpen) {
   const Window w{};

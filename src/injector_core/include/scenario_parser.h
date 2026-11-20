@@ -6,7 +6,11 @@
 
 #include "scenario.h"
 
+namespace fxcore {
+
 std::expected<Scenario, std::string> parse_scenario(
     std::string_view scenario_file);
+
+}
 
 #endif  // INJECTOR_CORE_INCLUDE_SCENARIO_PARSER_H_

@@ -1,6 +1,9 @@
 #ifndef INJECTOR_CORE_INCLUDE_UTILS_H_
 #define INJECTOR_CORE_INCLUDE_UTILS_H_
+#include <cmath>
 #include <stdexcept>
+
+namespace fxcore {
 
 class Probability {
   double value_{0.0};
@@ -16,4 +19,6 @@ class Probability {
 
   double value() const { return value_; }
 };
+
+}  // namespace fxcore
 #endif  //  INJECTOR_CORE_INCLUDE_UTILS_H_

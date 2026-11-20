@@ -9,6 +9,8 @@
 #include "perturb.h"
 #include "timestamp.h"
 
+namespace fxcore {
+
 class FaultPipe {
   struct Stage {
     Fault fault;
@@ -43,5 +45,5 @@ class FaultPipe {
 
   std::optional<Timestamp> next_due() const;
 };
-
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_FAULT_PIPE_H_

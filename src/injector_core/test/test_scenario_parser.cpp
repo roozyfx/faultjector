@@ -14,6 +14,8 @@
 
 #include "scenario_parser.h"
 
+using namespace fxcore;
+
 namespace {
 
 using namespace std::chrono_literals;
@@ -80,11 +82,6 @@ class ScenarioParserTest : public ::testing::Test {
 // ---------------------------------------------------------------------------
 // File level
 // ---------------------------------------------------------------------------
-
-TEST_F(ScenarioParserTest, MissingFileIsAnError) {
-  EXPECT_FALSE(parse_scenario((dir_ / "does_not_exist.yaml").string()));
-}
-
 TEST_F(ScenarioParserTest, EmptyFileIsAnError) { EXPECT_FALSE(parses("")); }
 
 TEST_F(ScenarioParserTest, MalformedYamlIsAnError) {

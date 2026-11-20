@@ -3,11 +3,10 @@
 
 #include <chrono>
 #include <cstdint>
-#include <map>
-#include <string>
 
+namespace fxcore {
 using SequenceNumber = uint64_t;
 
 using nanoseconds = std::chrono::nanoseconds;
-
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_CORE_TYPES_H_

@@ -3,11 +3,13 @@
 
 #include "timestamp.h"
 
+namespace fxcore {
+
 // FIXME
 #include <string>
 struct Payload {
   std::string temp_str;
-};
+};  // struct Payload
 
 struct Emission {
   Timestamp due_time{};
@@ -23,4 +25,5 @@ struct Message {
 
 Message to_message(const Emission& e);
 Emission to_emission(const Message& m);
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_MESSAGE_H

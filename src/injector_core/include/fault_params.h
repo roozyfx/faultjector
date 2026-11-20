@@ -7,8 +7,10 @@
 #include "core_types.h"
 #include "utils.h"
 
+namespace fxcore {
+
 /* There are 5 and only 5 type of Fault:
-Delay, Drop, Duplicate, Reorder, Clock Skew */
+              Delay, Drop, Duplicate, Reorder, Clock Skew */
 
 // FIXME I'm assuming Normal Distribution! It should be flexible to accept
 // variable number of parameters depending on distribution (?!) Delay: hold each
@@ -49,5 +51,5 @@ struct ClockSkewParams {
 
 using FaultParams = std::variant<DelayParams, DropParams, DuplicateParams,
                                  ReorderParams, ClockSkewParams>;
-
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_FAULT_PARAMS_H_

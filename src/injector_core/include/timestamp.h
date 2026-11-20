@@ -2,6 +2,8 @@
 #define INJECTOR_CORE_INCLUDE_TIMESTAMP_H_
 #include "core_types.h"
 
+namespace fxcore {
+
 class Timestamp {
   nanoseconds val_;
 
@@ -20,6 +22,7 @@ class Timestamp {
   inline bool operator<=(const Timestamp& t1) const {
     return val_ <= t1.value();
   }
-};
+};  // class Timestamp
 
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_TIMESTAMP_H_

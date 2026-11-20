@@ -5,6 +5,8 @@
 #include <random>
 #include <type_traits>
 
+namespace fxcore {
+
 // roughly what std wants from a distribution
 template <class Distribution, class Engine>
 concept RandomNumberDistribution = requires(Distribution dist, Engine& gen) {
@@ -75,5 +77,5 @@ class RNG {
   Engine engine_;
   uint64_t seed_;
 };
-
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_RNG_H_

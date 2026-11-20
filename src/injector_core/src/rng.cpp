@@ -3,6 +3,8 @@
 #include <cmath>  // for std::isnan
 #include <stdexcept>
 
+using namespace fxcore;
+
 template <numerics T>
 inline T RNG::in_interval_uniform(const T& low, const T& high) {
   if (low > high) {

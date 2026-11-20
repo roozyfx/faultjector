@@ -5,6 +5,8 @@
 #include "message.h"
 #include "window.h"
 
+using namespace fxcore;
+
 void FaultPipe::submit(const Message& message) {
   std::vector<Emission> working{{message.sensor_time, message.message}};
 

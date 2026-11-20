@@ -13,7 +13,8 @@ struct overloaded : Ts... {
   using Ts::operator()...;
 };
 
-std::optional<Timestamp> Window::handle_start(const EventTimes& events) const {
+std::optional<fxcore::Timestamp> fxcore::Window::handle_start(
+    const EventTimes& events) const {
   if (!start) return Timestamp(0ns);
 
   return std::visit(
@@ -30,7 +31,8 @@ std::optional<Timestamp> Window::handle_start(const EventTimes& events) const {
       *start);
 }
 
-bool Window::contains(const Timestamp& ts, const EventTimes& events) const {
+bool fxcore::Window::contains(const Timestamp& ts,
+                              const EventTimes& events) const {
   auto strt = handle_start(events);
 
   if (!strt.has_value() || ts < strt.value()) return false;

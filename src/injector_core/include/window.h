@@ -8,6 +8,8 @@
 #include "events.h"
 #include "timestamp.h"
 
+namespace fxcore {
+
 struct AtTime {
   nanoseconds time{};
 };
@@ -43,5 +45,7 @@ struct Window {
   // Helper for contains to resolve the start of current window
   std::optional<Timestamp> handle_start(const EventTimes& events) const;
 };
+
+}  // namespace fxcore
 
 #endif  // INJECTOR_CORE_INCLUDE_WINDOW_H_

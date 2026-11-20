@@ -8,6 +8,8 @@
 #include "message.h"
 #include "rng.h"
 
+namespace fxcore {
+
 using Emissions = std::vector<Emission>;
 
 class Perturb {
@@ -29,5 +31,5 @@ class Perturb {
   Emissions apply(const ReorderParams& reorder, const Message& message);
   Emissions apply(const ClockSkewParams& clock_skew, const Message& message);
 };
-
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_PERTURB_HPP_

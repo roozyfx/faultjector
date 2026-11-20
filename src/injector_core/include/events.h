@@ -6,6 +6,8 @@
 
 #include "timestamp.h"
 
+namespace fxcore {
 using EventTimes = std::map<std::string, Timestamp>;
+}
 
 #endif  // INJECTOR_CORE_INCLUDE_CORE_TYPES_H_

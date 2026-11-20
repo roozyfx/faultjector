@@ -1,5 +1,14 @@
 #ifndef INJECTOR_CORE_INCLUDE_SCENARIO_H_
 #define INJECTOR_CORE_INCLUDE_SCENARIO_H_
+#include <cstdint>
+#include <map>
+#include <string>
+#include <vector>
+
+#include "core_types.h"
+#include "injection.h"
+
+namespace fxcore {
 
 // Sample scenario file:
 /*
@@ -25,13 +34,6 @@ assert:
   - max_cross_track_error: { below: 0.30m, during: odom_lag }
   - max_cross_track_error: { below: 0.10m, after: odom_lag, settle: 5s }
 */
-#include <cstdint>
-#include <map>
-#include <string>
-#include <vector>
-
-#include "core_types.h"
-#include "injection.h"
 
 using RecordList = std::vector<std::string>;
 
@@ -55,5 +57,5 @@ struct Scenario {
   // FIXME uncomment
   //  Assertion assert{};
 };
-
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_SCENARIO_H_

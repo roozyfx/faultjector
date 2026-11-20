@@ -9,10 +9,15 @@
 #include <string_view>
 #include <utility>  // for std::unreachable
 
+#include "core_types.h"
 #include "fault.h"
 #include "utils.h"
 #include "window.h"
 #include "yaml-cpp/yaml.h"
+
+namespace {
+
+using namespace fxcore;
 
 // Find a given string @p key in the YAML::Node @p map, or
 // std::nullopt if null or doesn't exist
@@ -75,15 +80,16 @@ nanoseconds to_time_offset(const YAML::Node& node) {
   throw YAML::RepresentationException(node.Mark(),
                                       "not a valid time duration format");
 }
+}  // namespace
 
 namespace YAML {
 template <>
 struct convert<WindowStart> {
-  static Node encode(const WindowStart& ws) {
+  static Node encode(const WindowStart&) {
     // TODO
     Node node;
     return node;
-  };
+  }
 
   static bool decode(const Node& node, WindowStart& win_start) {
     check_keys(node, {"time", "event", "after"});
@@ -108,11 +114,11 @@ struct convert<WindowStart> {
 
 template <>
 struct convert<WindowEnd> {
-  static Node encode(const WindowEnd& ws) {
+  static Node encode(const WindowEnd&) {
     // TODO
     Node node;
     return node;
-  };
+  }
 
   static bool decode(const Node& node, WindowEnd& win_end) {
     check_keys(node, {"time", "duration"});
@@ -135,11 +141,11 @@ struct convert<WindowEnd> {
 
 template <>
 struct convert<Window> {
-  static Node encode(const Window& win) {
+  static Node encode(const Window&) {
     // TODO
     Node node;
     return node;
-  };
+  }
 
   static bool decode(const Node& node, Window& win) {
     check_keys(node, {"start", "end"});
@@ -157,7 +163,7 @@ struct convert<Window> {
 
 template <>
 struct convert<Fault> {
-  static Node encode(const Fault& fault) {
+  static Node encode(const Fault&) {
     Node node;
     // TODO
     return node;
@@ -267,6 +273,7 @@ struct convert<Injection> {
 };
 }  // namespace YAML
 
+namespace {
 std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
   std::expected<Scenario, std::string> res;
   try {
@@ -287,8 +294,9 @@ std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
     return std::unexpected(std::format("{}", e.what()));
   }
 }
+}  // namespace
 
-std::expected<Scenario, std::string> parse_scenario(
+std::expected<Scenario, std::string> fxcore::parse_scenario(
     std::string_view scenario_file) {
   try {
     YAML::Node root = YAML::LoadFile(std::string(scenario_file));

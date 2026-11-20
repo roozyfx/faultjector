@@ -4,7 +4,11 @@
 
 #include "message.h"
 #include "timestamp.h"
-Emissions Perturb::apply(const DelayParams& delay, const Message& message) {
+
+using fxcore::Emissions;
+
+Emissions fxcore::Perturb::apply(const DelayParams& delay,
+                                 const Message& message) {
   ++count_;
   // TODO what if delay.distribution?
   auto random_ns{rng_.gaussian(delay.mean, delay.jitter)};
@@ -19,7 +23,8 @@ Emissions Perturb::apply(const DelayParams& delay, const Message& message) {
   return {{message.sensor_time + random_ts, message.message}};
 }
 
-Emissions Perturb::apply(const DropParams& drop, const Message& message) {
+Emissions fxcore::Perturb::apply(const DropParams& drop,
+                                 const Message& message) {
   Emission unperturbed{to_emission(message)};
 
   if (drop.probability) {
@@ -39,8 +44,8 @@ Emissions Perturb::apply(const DropParams& drop, const Message& message) {
   return {unperturbed};
 }
 
-Emissions Perturb::apply(const DuplicateParams& duplicate,
-                         const Message& message) {
+Emissions fxcore::Perturb::apply(const DuplicateParams& duplicate,
+                                 const Message& message) {
   const auto random_number{rng_.random_probability()};
   if (random_number <= duplicate.probability.value()) {
     count_ += 2;
@@ -55,7 +60,8 @@ Emissions Perturb::apply(const DuplicateParams& duplicate,
 // Reorder changes the Payload content of the other end of window_size, and
 // keeps the timestamp of the arrived message.
 // [1 .... N] with 1 the oldest in the window -> send {N.timestamp, 1.message}
-Emissions Perturb::apply(const ReorderParams& reorder, const Message& message) {
+Emissions fxcore::Perturb::apply(const ReorderParams& reorder,
+                                 const Message& message) {
   Emission em{to_emission(message)};
 
   const auto random_number{rng_.random_probability()};
@@ -74,8 +80,8 @@ Emissions Perturb::apply(const ReorderParams& reorder, const Message& message) {
   return {to_emission(message)};
 }
 
-Emissions Perturb::apply(const ClockSkewParams& clock_skew,
-                         const Message& message) {
+Emissions fxcore::Perturb::apply(const ClockSkewParams& clock_skew,
+                                 const Message& message) {
   // TODO
   return {
       {message.sensor_time + Timestamp(clock_skew.offset), message.message}};

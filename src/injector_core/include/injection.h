@@ -5,11 +5,12 @@
 
 #include "fault.h"
 
+namespace fxcore {
 struct Injection {
   std::string topic;
   std::string source;
   Faults faults;
-};
+};  // struct Injection
 using Injections = std::vector<Injection>;
-
+}  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_INJECTION_H_

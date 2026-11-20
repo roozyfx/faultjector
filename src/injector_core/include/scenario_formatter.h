@@ -4,11 +4,12 @@
 
 #include "scenario.h"
 
+using namespace fxcore;
 /* Formatter for Scenario type, so that std::print/ln can show the output easily
 and cleanly.
-TODO: Since it is only needed for test purposes, is still (And
-probably stays!) in an incomplete state, until necessity asks for it! With the
-same reason, it can be removed from the project.
+TODO: Since it is only needed for test purposes, is still (And probably stays!)
+in an incomplete state, until necessity asks for it! With the same reason, it
+can be removed from the project.
 */
 template <>
 struct std::formatter<Scenario> : public std::formatter<std::string> {
@@ -58,4 +59,5 @@ struct std::formatter<Scenario> : public std::formatter<std::string> {
     return ctx.out();
   }
 };
+
 #endif  // INJECTOR_CORE_INCLUDE_SCENARIO_FORMATTER_H_
