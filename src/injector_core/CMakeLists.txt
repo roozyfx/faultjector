@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.40...4.4.2)
-project(injector_core VERSION 0.2.0 LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.28...4.4.2)
+project(injector_core VERSION 0.3.0 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
