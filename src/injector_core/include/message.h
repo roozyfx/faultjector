@@ -22,4 +22,5 @@ struct Message {
 };
 
 Message to_message(const Emission& e);
+Emission to_emission(const Message& m);
 #endif  // INJECTOR_CORE_INCLUDE_MESSAGE_H
