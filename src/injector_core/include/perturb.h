@@ -1,6 +1,7 @@
 #ifndef INJECTOR_CORE_INCLUDE_PERTURB_H_
 #define INJECTOR_CORE_INCLUDE_PERTURB_H_
 
+#include <optional>
 #include <vector>
 
 #include "fault_params.h"
@@ -10,11 +11,10 @@
 using Emissions = std::vector<Emission>;
 
 class Perturb {
-  Emissions buffer_;
-
-  // TODO IMPORTANT: Think if I should deal with emtpy message in the beginning
-  // of each override
   RNG rng_;
+  size_t count_{0};               // keep track of incoming messages
+  std::optional<Emission> held_;  // For reorder
+  size_t wait_;                   // For reorder
 
  public:
   explicit Perturb(const uint64_t& rng_seed)
