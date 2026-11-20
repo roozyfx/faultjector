@@ -1,10 +1,8 @@
 #ifndef INJECTOR_CORE_INCLUDE_RNG_H_
 #define INJECTOR_CORE_INCLUDE_RNG_H_
 #include <chrono>
-#include <cmath>  // for std::isnan
 #include <concepts>
 #include <random>
-#include <stdexcept>
 #include <type_traits>
 
 // roughly what std wants from a distribution
@@ -53,10 +51,6 @@ class RNG {
 
   inline uint64_t seed() const { return seed_; }
 
-  // ints/reals uniform distribution over [low, high]
-  template <numerics T>
-  T in_interval_uniform(const T& low, const T& high);
-
   // gaussian distribution for floating_point numbers
   template <std::floating_point T>
   T gaussian(const T& mean, const T& stddev);
@@ -64,16 +58,20 @@ class RNG {
   // gaussian distribution for nanoseconds
   ns gaussian(const ns& mean_ns, const ns& stddev_ns);
 
+  // [0, 1)
+  double random_probability();
+
+ private:
+  // ints/reals uniform distribution over [low, high]
+  template <numerics T>
+  T in_interval_uniform(const T& low, const T& high);
+
   // pass an arbitrary distribution. Note that params are not checked for an
   // arbitrary one, only uniform and normal dist. are checked (above)
   template <typename RND>
     requires RandomNumberDistribution<RND, Engine>
   auto in_interval_rnd(RND rand_num_distribution);
 
-  // [0, 1)
-  double random_probability();
-
- private:
   Engine engine_;
   uint64_t seed_;
 };

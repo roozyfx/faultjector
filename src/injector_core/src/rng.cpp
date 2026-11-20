@@ -1,5 +1,8 @@
 #include "rng.h"
 
+#include <cmath>  // for std::isnan
+#include <stdexcept>
+
 template <numerics T>
 inline T RNG::in_interval_uniform(const T& low, const T& high) {
   if (low > high) {
@@ -38,14 +41,19 @@ inline T RNG::gaussian(const T& mean, const T& stddev) {
 }
 
 ns RNG::gaussian(const ns& mean_ns, const ns& stddev_ns) {
-  const double mean{static_cast<double>(mean_ns.count())};
+  // with standard deviation at 0, fix the return to mean.
+  if (stddev_ns == ns::zero()) return mean_ns;
+
   const double stddev{static_cast<double>(stddev_ns.count())};
-  if (stddev <= 0 || std::isnan(stddev) || !std::isfinite(stddev)) {
+  if (stddev < 0 || std::isnan(stddev) || !std::isfinite(stddev)) {
     throw std::invalid_argument("'stddev' must be a positive real number.");
   }
+
+  const double mean{static_cast<double>(mean_ns.count())};
   if (std::isnan(mean) || std::isinf(mean)) {
     throw std::invalid_argument("'mean' must be a finite real number.");
   }
+
   const auto rand_d{
       in_interval_rnd(std::normal_distribution<double>(mean, stddev))};
   return ns(static_cast<int64_t>(rand_d));
