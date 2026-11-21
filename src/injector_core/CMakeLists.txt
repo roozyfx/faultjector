@@ -23,7 +23,7 @@ set_target_properties(injector_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 # Linux and macOS
 if(CMAKE_SYSTEM_NAME MATCHES Linux OR CMAKE_SYSTEM_NAME MATCHES Darwin)
     target_compile_options(injector_core PRIVATE
-        $<$<CONFIG:Debug>:-g;-O0;-fsanitize=address,undefined;-Wfloat-equal;-fno-omit-frame-pointer>
+        $<$<CONFIG:Debug>:-g;-O0;-fsanitize=address,undefined;-Wall;-Wfloat-equal;-Wmissing-declarations;-fno-omit-frame-pointer>
         $<$<CONFIG:Release>:-O3>
     )
     # GCC
