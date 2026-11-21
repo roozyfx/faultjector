@@ -32,6 +32,7 @@ Emissions fxcore::Perturb::apply(const DropParams& drop,
     if (random_number <= drop.probability->value()) {
       return {};
     }
+    ++count_;
   }
 
   // This is the n'th message, drop it and reset the counter
@@ -40,7 +41,6 @@ Emissions fxcore::Perturb::apply(const DropParams& drop,
   }
 
   // No dropping happens
-  ++count_;
   return {unperturbed};
 }
 
