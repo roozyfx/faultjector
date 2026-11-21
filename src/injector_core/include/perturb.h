@@ -14,9 +14,9 @@ using Emissions = std::vector<Emission>;
 
 class Perturb {
   RNG rng_;
-  size_t count_{0};               // keep track of incoming messages
-  std::optional<Emission> held_;  // For reorder
-  size_t wait_;                   // For reorder
+  size_t count_{0};  // keep track of incoming messages
+  std::optional<Emission> held_{std::nullopt};  // For reorder
+  size_t wait_{0};                              // For reorder
 
  public:
   explicit Perturb(const uint64_t& rng_seed)
