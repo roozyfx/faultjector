@@ -1,12 +1,11 @@
 #include "scenario_parser.h"
 
+#include <yaml-cpp/exceptions.h>
 #include <yaml-cpp/node/convert.h>
 
 #include <chrono>
 #include <cstring>
-#include <exception>
 #include <expected>
-#include <optional>
 #include <string>
 #include <string_view>
 #include <unordered_set>
@@ -17,10 +16,16 @@
 #include "utils.h"
 #include "window.h"
 #include "yaml-cpp/yaml.h"
-
+using namespace std::chrono_literals;
 namespace {
 
 using namespace fxcore;
+
+// Checks if a given string @p key exists in the YAML::Node @p node
+bool contains(const YAML::Node& node, std::string_view key) {
+  const YAML::Node value = node[key];
+  return value && !value.IsNull();
+}
 
 void check_keys(
     const YAML::Node& map,
@@ -87,9 +92,14 @@ struct convert<WindowStart> {
   }
 
   static bool decode(const Node& node, WindowStart& win_start) {
-    check_keys(node, {"time", "event", "after"});
-    const bool is_at_time{node["time"]};
-    const bool is_after_event{(node["after"] && node["event"])};
+    // Check that only one of "time"/{"event", "after"} is specified
+    const bool is_at_time{contains(node, "time")};
+    if (is_at_time) check_keys(node, {"time"});
+
+    const bool is_after_event{contains(node, "event") &&
+                              contains(node, "after")};
+    if (is_after_event) check_keys(node, {"event", "after"});
+
     if (!node.IsMap() || !(is_at_time || is_after_event)) return false;
 
     if (is_at_time) {
@@ -116,16 +126,20 @@ struct convert<WindowEnd> {
   }
 
   static bool decode(const Node& node, WindowEnd& win_end) {
-    check_keys(node, {"time", "duration"});
+    const bool is_at_time{contains(node, "time")};
+    const bool is_for_duration{contains(node, "duration")};
+    if (is_at_time) check_keys(node, {"time"});
+    if (is_for_duration) check_keys(node, {"duration"});
+
     // nodes
     if (!node.IsMap() || !(node["duration"] || node["time"])) return false;
 
-    if (node["time"]) {
+    if (is_at_time) {
       AtTime at_time;
       at_time.time = to_duration(node["time"]);
       win_end = at_time;
     }
-    if (node["duration"]) {
+    if (is_for_duration) {
       ForDuration for_duration;
       for_duration.duration = to_duration(node["duration"]);
       win_end = for_duration;
@@ -147,14 +161,17 @@ struct convert<Window> {
     if (!node.IsMap()) return false;
 
     // If no window.start is specified, default is from the beginning
-    win.start = node["start"].as<WindowStart>(AtTime{nanoseconds{0}});
+    auto has_start{contains(node, "start")};
+    win.start = has_start ? node["start"].as<WindowStart>() : AtTime(0ns);
+
     // If no window.end is specified, default is to the end
+    auto has_end{contains(node, "end")};
     win.end =
-        node["end"].as<WindowEnd>(AtTime{nanoseconds{nanoseconds::max()}});
+        has_end ? node["end"].as<WindowEnd>() : AtTime(nanoseconds::max());
 
     return true;
   }
-};
+};  // namespace YAML
 
 template <>
 struct convert<Fault> {
