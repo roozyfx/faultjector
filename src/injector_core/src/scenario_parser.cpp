@@ -4,6 +4,7 @@
 #include <yaml-cpp/node/convert.h>
 
 #include <chrono>
+#include <cstdint>
 #include <cstring>
 #include <expected>
 #include <string>
@@ -37,9 +38,10 @@ void check_keys(
   }
 }
 
-nanoseconds to_duration(const YAML::Node& node) {
+template <typename T>
+nanoseconds to_nanoseconds(const YAML::Node& node) {
   const std::string str{node.as<std::string>()};
-  uint64_t value;
+  T value;
   auto [unit, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
   if (ec != std::errc()) {
     throw YAML::RepresentationException(node.Mark(), "invalid value");
@@ -59,27 +61,13 @@ nanoseconds to_duration(const YAML::Node& node) {
                                       "not a valid time duration format");
 }
 
-nanoseconds to_time_offset(const YAML::Node& node) {
-  const std::string str{node.as<std::string>()};
-  int64_t value;
-  auto [unit, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-  if (ec != std::errc()) {
-    throw YAML::RepresentationException(node.Mark(), "invalid value");
-  }
-  if (std::strcmp(unit, "min") == 0) {
-    return std::chrono::minutes(value);
-  } else if (std::strcmp(unit, "s") == 0) {
-    return std::chrono::seconds(value);
-  } else if (std::strcmp(unit, "ms") == 0) {
-    return std::chrono::milliseconds(value);
-  } else if (std::strcmp(unit, "us") == 0) {
-    return std::chrono::microseconds(value);
-  } else if (std::strcmp(unit, "ns") == 0) {
-    return std::chrono::nanoseconds(value);
-  }
-  throw YAML::RepresentationException(node.Mark(),
-                                      "not a valid time duration format");
-}
+auto to_duration = [](const YAML::Node& node) {
+  return to_nanoseconds<uint64_t>(node);
+};
+auto to_time_offset = [](const YAML::Node& node) {
+  return to_nanoseconds<int64_t>(node);
+};
+
 }  // namespace
 
 namespace YAML {
@@ -300,7 +288,6 @@ struct convert<Injection> {
 
 namespace {
 std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
-  std::expected<Scenario, std::string> res;
   try {
     // FIXME add "assert"
     // check_keys(root,{"name", "seed", "timeout", "injections", "record",
