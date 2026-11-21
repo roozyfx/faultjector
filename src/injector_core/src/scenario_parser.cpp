@@ -1,5 +1,7 @@
 #include "scenario_parser.h"
 
+#include <yaml-cpp/node/convert.h>
+
 #include <chrono>
 #include <cstring>
 #include <exception>
@@ -7,6 +9,7 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <utility>  // for std::unreachable
 
 #include "core_types.h"
@@ -18,14 +21,6 @@
 namespace {
 
 using namespace fxcore;
-
-// Find a given string @p key in the YAML::Node @p map, or
-// std::nullopt if null or doesn't exist
-std::optional<YAML::Node> find(const YAML::Node& map, const std::string& key) {
-  const YAML::Node value = map[key];
-  if (!value or value.IsNull()) return std::nullopt;
-  return value;
-}
 
 void check_keys(
     const YAML::Node& map,
@@ -163,6 +158,10 @@ struct convert<Window> {
 
 template <>
 struct convert<Fault> {
+ private:
+  static std::unordered_set<std::string> ids;
+
+ public:
   static Node encode(const Fault&) {
     Node node;
     // TODO
@@ -175,7 +174,15 @@ struct convert<Fault> {
     // non-existant and it'd still be valid scenario file
     if (!node.IsMap() || !node["id"] || !node["params"]) return false;
 
-    fault.id = node["id"].as<std::string>();
+    const auto id{node["id"].as<std::string>()};
+    // Check if id is unique
+    if (ids.contains(id)) {
+      throw YAML::InvalidNode("Fault id must be unique. '" + id +
+                              "' has already been used.");
+    }
+    ids.insert(id);
+    fault.id = id;
+
     fault.type = node["type"].as<std::string>();
     const auto& params{node["params"]};
     if (fault.type.compare("delay") == 0) {
@@ -248,6 +255,7 @@ struct convert<Fault> {
     return true;
   }
 };
+std::unordered_set<std::string> YAML::convert<fxcore::Fault>::ids = {};
 
 template <>
 struct convert<Injection> {
