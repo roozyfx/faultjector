@@ -66,7 +66,7 @@ Emissions fxcore::Perturb::apply(const ReorderParams& reorder,
 
   const auto random_number{rng_.random_probability()};
   if (held_) {
-    if (--wait_ > 0) return {};
+    if (--wait_ > 0) return {em};
 
     Emission late{em.due_time, std::move(held_->message)};
     held_.reset();
