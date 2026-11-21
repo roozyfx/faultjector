@@ -8,7 +8,8 @@ namespace fxcore {
 class Probability {
   double value_{0.0};
   static constexpr double check(const double d) {
-    if (d < 0. || d > 1.) throw std::out_of_range("value should be in [0, 1]");
+    if (!(d >= 0. && d <= 1.))
+      throw std::out_of_range("value should be in [0, 1]");
     return d;
   }
 
