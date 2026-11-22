@@ -7,14 +7,14 @@
 
 using namespace fxcore;
 
-void FaultPipe::submit(const Message& message) {
+void FaultPipe::submit(const Message& message, const EventTimes& events_map) {
   std::vector<Emission> working{{message.sensor_time, message.message}};
 
   for (auto& stage : stages_) {
     std::vector<Emission> next;
     for (auto& em : working) {
       // Outside of the fault's window, passes through
-      if (!stage.fault.window.contains(em.due_time, events_map_)) {
+      if (!stage.fault.window.contains(em.due_time, events_map)) {
         // 'working' is substituted by 'next' later, so it's safe to move(em)
         next.push_back(std::move(em));
         continue;

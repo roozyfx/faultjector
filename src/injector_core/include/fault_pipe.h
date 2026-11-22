@@ -17,13 +17,10 @@ class FaultPipe {
     Perturb perturb;
   };
   std::vector<Stage> stages_;
-  EventTimes events_map_;
   std::multiset<Emission> emissions_;
 
  public:
-  explicit FaultPipe(const Faults& faults, const uint64_t scenario_seed,
-                     const EventTimes& events_map)
-      : events_map_{events_map} {
+  explicit FaultPipe(const Faults& faults, const uint64_t scenario_seed) {
     for (const auto& fault : faults) {
       stages_.push_back(
           {fault, Perturb(scenario_seed + std::hash<std::string>{}(fault.id))});
@@ -37,7 +34,7 @@ class FaultPipe {
   FaultPipe(FaultPipe&&) noexcept = default;
   FaultPipe& operator=(FaultPipe&&) = default;
 
-  void submit(const Message& msg);
+  void submit(const Message& msg, const EventTimes& events_map);
 
   inline std::multiset<Emission> emissions() const { return emissions_; }
 
