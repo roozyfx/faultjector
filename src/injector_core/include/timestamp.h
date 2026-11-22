@@ -1,6 +1,6 @@
 #ifndef INJECTOR_CORE_INCLUDE_TIMESTAMP_H_
 #define INJECTOR_CORE_INCLUDE_TIMESTAMP_H_
-#include "core_types.h"
+#include <chrono>
 
 namespace fxcore {
 

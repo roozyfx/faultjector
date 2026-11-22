@@ -1,5 +1,5 @@
-#ifndef INJECTOR_CORE_INCLUDE_UTILS_H_
-#define INJECTOR_CORE_INCLUDE_UTILS_H_
+#ifndef INJECTOR_CORE_INCLUDE_PROBABILITY_H_
+#define INJECTOR_CORE_INCLUDE_PROBABILITY_H_
 #include <cmath>
 #include <stdexcept>
 
@@ -22,4 +22,4 @@ class Probability {
 };
 
 }  // namespace fxcore
-#endif  //  INJECTOR_CORE_INCLUDE_UTILS_H_
+#endif  //  INJECTOR_CORE_INCLUDE_PROBABILITY_H_

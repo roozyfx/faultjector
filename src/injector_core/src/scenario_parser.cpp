@@ -12,12 +12,14 @@
 #include <unordered_set>
 #include <utility>  // for std::unreachable
 
-#include "core_types.h"
 #include "fault.h"
-#include "utils.h"
+#include "probability.h"
+#include "timestamp.h"
 #include "window.h"
 #include "yaml-cpp/yaml.h"
+
 using namespace std::chrono_literals;
+
 namespace {
 
 using namespace fxcore;

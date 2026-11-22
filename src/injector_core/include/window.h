@@ -4,7 +4,6 @@
 #include <string>
 #include <variant>
 
-#include "core_types.h"
 #include "events.h"
 #include "timestamp.h"
 

@@ -1,9 +1,7 @@
 #include "window.h"
 
-#include <chrono>
 #include <optional>
 
-#include "core_types.h"
 #include "timestamp.h"
 
 using namespace std::chrono_literals;

@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "core_types.h"
 #include "injection.h"
 
 namespace fxcore {
