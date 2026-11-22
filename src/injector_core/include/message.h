@@ -13,13 +13,15 @@ struct Payload {
 
 struct Emission {
   Timestamp due_time{};
+  uint64_t sequence{};
   Payload message{};
 };
 
 bool operator<(const Emission& e1, const Emission& e2);
 
 struct Message {
-  Timestamp sensor_time{};
+  Timestamp received_time{};
+  uint64_t sequence{};
   Payload message{};
 };
 

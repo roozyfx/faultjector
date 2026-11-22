@@ -8,7 +8,8 @@
 using namespace fxcore;
 
 void FaultPipe::submit(const Message& message, const EventTimes& events_map) {
-  std::vector<Emission> working{{message.sensor_time, message.message}};
+  std::vector<Emission> working{
+      {message.received_time, message.sequence, message.message}};
 
   for (auto& stage : stages_) {
     std::vector<Emission> next;
@@ -37,7 +38,7 @@ std::vector<Message> FaultPipe::flush(const Timestamp& now) {
   std::vector<Message> result;
   while (!emissions_.empty() && emissions_.begin()->due_time <= now) {
     auto em = emissions_.extract(emissions_.begin()).value();
-    result.push_back({em.due_time, std::move(em.message)});
+    result.push_back({em.due_time, em.sequence, std::move(em.message)});
   }
   return result;
 }

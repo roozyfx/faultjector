@@ -11,16 +11,17 @@ Emissions fxcore::Perturb::apply(const DelayParams& delay,
                                  const Message& message) {
   ++count_;
   // TODO what if delay.distribution?
-  auto random_ns{rng_.gaussian(delay.mean, delay.jitter)};
+  auto random_ts{rng_.gaussian(delay.mean, delay.jitter)};
 
   // TODO
   //  If stddev is close to mean, clamping would be a problem, clamping
   //  random_ns to 0. If that is a realistic use-case do something else
   //  instead, e.g. redraw. I found that unrealistic
-  random_ns = std::clamp(random_ns, ns::zero(), ns::max());
-  const Timestamp random_ts{Timestamp(random_ns)};
+  random_ts = std::clamp(random_ts, Timestamp(), Timestamp::max());
+  const Duration random_duration{random_ts - Timestamp()};
 
-  return {{message.sensor_time + random_ts, message.message}};
+  return {{message.received_time + random_duration, message.sequence,
+           message.message}};
 }
 
 Emissions fxcore::Perturb::apply(const DropParams& drop,
@@ -49,9 +50,9 @@ Emissions fxcore::Perturb::apply(const DuplicateParams& duplicate,
   const auto random_number{rng_.random_probability()};
   if (random_number <= duplicate.probability.value()) {
     count_ += 2;
-    return {
-        to_emission(message),
-        {message.sensor_time + Timestamp(duplicate.spacing), message.message}};
+    return {to_emission(message),
+            {message.received_time + Duration(duplicate.spacing),
+             message.sequence, message.message}};
   }
   ++count_;
   return {to_emission(message)};
@@ -68,7 +69,7 @@ Emissions fxcore::Perturb::apply(const ReorderParams& reorder,
   if (held_) {
     if (--wait_ > 0) return {em};
 
-    Emission late{em.due_time, std::move(held_->message)};
+    Emission late{em.due_time, em.sequence, std::move(held_->message)};
     held_.reset();
     return {em, std::move(late)};
   }
@@ -80,9 +81,9 @@ Emissions fxcore::Perturb::apply(const ReorderParams& reorder,
   return {to_emission(message)};
 }
 
-Emissions fxcore::Perturb::apply(const ClockSkewParams& clock_skew,
+Emissions fxcore::Perturb::apply(const ClockSkewParams& clock_skew
+                                 [[maybe_unused]],
                                  const Message& message) {
   // TODO
-  return {
-      {message.sensor_time + Timestamp(clock_skew.offset), message.message}};
+  return {{to_emission(message)}};
 }
