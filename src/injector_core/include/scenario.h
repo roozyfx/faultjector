@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "injection.h"
+#include "timestamp.h"
 
 namespace fxcore {
 
@@ -50,7 +51,7 @@ struct Assertion {
 struct Scenario {
   std::string name{};
   uint64_t seed{};
-  nanoseconds timeout{};
+  Duration timeout{};
   Injections injections{};
   RecordList record{};
   // FIXME uncomment

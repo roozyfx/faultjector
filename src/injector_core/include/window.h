@@ -10,16 +10,16 @@
 namespace fxcore {
 
 struct AtTime {
-  nanoseconds time{};
+  Timestamp time{};
 };
 
 struct AfterEvent {
   std::string event;
-  nanoseconds after{};
+  Duration after{};
 };
 
 struct ForDuration {
-  nanoseconds duration{};
+  Duration duration{};
 };
 
 using WindowStart = std::variant<AtTime, AfterEvent>;

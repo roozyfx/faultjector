@@ -4,25 +4,17 @@
 
 namespace fxcore {
 
-class Timestamp {
-  nanoseconds val_;
+struct SimClock {
+  using duration = std::chrono::nanoseconds;
+  using rep = duration::rep;
+  using period = duration::period;
+  using time_point = std::chrono::time_point<SimClock>;
+  static constexpr bool is_steady = false;
+};
 
- public:
-  explicit Timestamp()
-      : val_(0) {}
-  explicit Timestamp(const nanoseconds& ns)
-      : val_{ns} {}
-
-  nanoseconds value() const { return val_; }
-  inline Timestamp operator+(const Timestamp& ts) const {
-    return Timestamp(val_ + ts.val_);
-  }
-
-  inline bool operator<(const Timestamp& t1) const { return val_ < t1.value(); }
-  inline bool operator<=(const Timestamp& t1) const {
-    return val_ <= t1.value();
-  }
-};  // class Timestamp
+using Timestamp = SimClock::time_point;
+using Duration = SimClock::duration;
 
 }  // namespace fxcore
+
 #endif  // INJECTOR_CORE_INCLUDE_TIMESTAMP_H_

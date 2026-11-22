@@ -10,4 +10,4 @@ namespace fxcore {
 using EventTimes = std::map<std::string, Timestamp>;
 }
 
-#endif  // INJECTOR_CORE_INCLUDE_CORE_TYPES_H_
+#endif  // INJECTOR_CORE_INCLUDE_EVENTS_H_

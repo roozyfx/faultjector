@@ -16,8 +16,8 @@ namespace fxcore {
 // variable number of parameters depending on distribution (?!) Delay: hold each
 // Delay: hold each message for mean +/- jitter.
 struct DelayParams {
-  nanoseconds mean{};
-  nanoseconds jitter{};
+  Timestamp mean{};
+  Duration jitter{};
   // Unset: the injector's default distribution.
   std::optional<std::string> distribution;
 };
@@ -33,7 +33,7 @@ struct DropParams {
 struct DuplicateParams {
   Probability probability{};
   // time distance between the two copies
-  nanoseconds spacing{};
+  Duration spacing{};
 };
 
 // Reorder: reorder messages in the window_size with the probability
@@ -46,7 +46,7 @@ struct ReorderParams {
 // Clock Skew
 struct ClockSkewParams {
   // Added to `header.stamp`; may be negative.
-  nanoseconds offset{};
+  Duration offset{};
 };
 
 using FaultParams = std::variant<DelayParams, DropParams, DuplicateParams,

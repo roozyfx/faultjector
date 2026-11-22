@@ -16,16 +16,15 @@ std::optional<fxcore::Timestamp> fxcore::Window::handle_start(
   if (!start) return Timestamp(0ns);
 
   return std::visit(
-      overloaded{[](const AtTime& t) -> std::optional<Timestamp> {
-                   return Timestamp(t.time);
-                 },
-                 [&](const AfterEvent& e) -> std::optional<Timestamp> {
-                   if (events.contains(e.event)) {
-                     return events.at(e.event) + Timestamp(e.after);
-                   } else {
-                     return std::nullopt;
-                   }
-                 }},
+      overloaded{
+          [](const AtTime& t) -> std::optional<Timestamp> { return t.time; },
+          [&](const AfterEvent& e) -> std::optional<Timestamp> {
+            if (events.contains(e.event)) {
+              return events.at(e.event) + e.after;
+            } else {
+              return std::nullopt;
+            }
+          }},
       *start);
 }
 
@@ -38,9 +37,9 @@ bool fxcore::Window::contains(const Timestamp& ts,
   if (!end) return true;
 
   return std::visit(
-      overloaded{[&](const AtTime& t) -> bool { return ts.value() < t.time; },
+      overloaded{[&](const AtTime& t) -> bool { return ts < t.time; },
                  [&](const ForDuration& d) -> bool {
-                   return ts < strt.value() + Timestamp(d.duration);
+                   return ts < *strt + d.duration;
                  }},
       *end);
 }

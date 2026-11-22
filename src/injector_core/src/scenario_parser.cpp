@@ -41,7 +41,7 @@ void check_keys(
 }
 
 template <typename T>
-nanoseconds to_nanoseconds(const YAML::Node& node) {
+Timestamp parse_time(const YAML::Node& node) {
   const std::string str{node.as<std::string>()};
   T value;
   auto [unit, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
@@ -49,25 +49,27 @@ nanoseconds to_nanoseconds(const YAML::Node& node) {
     throw YAML::RepresentationException(node.Mark(), "invalid value");
   }
   if (std::strcmp(unit, "min") == 0) {
-    return std::chrono::minutes(value);
+    return Timestamp(std::chrono::minutes(value));
   } else if (std::strcmp(unit, "s") == 0) {
-    return std::chrono::seconds(value);
+    return Timestamp(std::chrono::seconds(value));
   } else if (std::strcmp(unit, "ms") == 0) {
-    return std::chrono::milliseconds(value);
+    return Timestamp(std::chrono::milliseconds(value));
   } else if (std::strcmp(unit, "us") == 0) {
-    return std::chrono::microseconds(value);
+    return Timestamp(std::chrono::microseconds(value));
   } else if (std::strcmp(unit, "ns") == 0) {
-    return std::chrono::nanoseconds(value);
+    return Timestamp(std::chrono::nanoseconds(value));
   }
-  throw YAML::RepresentationException(node.Mark(),
-                                      "not a valid time duration format");
+  throw YAML::RepresentationException(node.Mark(), "not a valid time format");
 }
 
-auto to_duration = [](const YAML::Node& node) {
-  return to_nanoseconds<uint64_t>(node);
+auto to_timestamp = [](const YAML::Node& node) -> Timestamp {
+  return parse_time<uint64_t>(node);
 };
-auto to_time_offset = [](const YAML::Node& node) {
-  return to_nanoseconds<int64_t>(node);
+auto to_duration = [](const YAML::Node& node) -> Duration {
+  return parse_time<uint64_t>(node) - Timestamp();
+};
+auto to_time_offset = [](const YAML::Node& node) -> Duration {
+  return parse_time<int64_t>(node) - Timestamp();
 };
 
 }  // namespace
@@ -94,7 +96,7 @@ struct convert<WindowStart> {
 
     if (is_at_time) {
       AtTime at_time;
-      at_time.time = to_duration(node["time"]);
+      at_time.time = to_timestamp(node["time"]);
       win_start = at_time;
     }
     if (is_after_event) {
@@ -126,7 +128,7 @@ struct convert<WindowEnd> {
 
     if (is_at_time) {
       AtTime at_time;
-      at_time.time = to_duration(node["time"]);
+      at_time.time = to_timestamp(node["time"]);
       win_end = at_time;
     }
     if (is_for_duration) {
@@ -152,12 +154,12 @@ struct convert<Window> {
 
     // If no window.start is specified, default is from the beginning
     auto has_start{contains(node, "start")};
-    win.start = has_start ? node["start"].as<WindowStart>() : AtTime(0ns);
+    win.start =
+        has_start ? node["start"].as<WindowStart>() : AtTime(Timestamp{});
 
     // If no window.end is specified, default is to the end
     auto has_end{contains(node, "end")};
-    win.end =
-        has_end ? node["end"].as<WindowEnd>() : AtTime(nanoseconds::max());
+    win.end = has_end ? node["end"].as<WindowEnd>() : AtTime(Timestamp::max());
 
     return true;
   }
@@ -195,7 +197,7 @@ struct convert<Fault> {
     if (fault.type.compare("delay") == 0) {
       check_keys(params, {"mean", "jitter", "distribution"});
       DelayParams p;
-      p.mean = to_duration(params["mean"]);
+      p.mean = to_timestamp(params["mean"]);
       p.jitter = to_duration(params["jitter"]);
       if (params["distribution"])
         p.distribution = params["distribution"].as<std::string>();
@@ -253,9 +255,9 @@ struct convert<Fault> {
     }
 
     if (!node["window"]) {
-      fault.window.start = AtTime{nanoseconds{0}};
+      fault.window.start = AtTime{Timestamp{}};
       // If no window.end is specified, default is to the end
-      fault.window.end = AtTime{nanoseconds{nanoseconds::max()}};
+      fault.window.end = AtTime{Timestamp::max()};
     } else {
       fault.window = node["window"].as<Window>();
     }
