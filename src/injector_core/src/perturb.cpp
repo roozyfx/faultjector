@@ -63,7 +63,7 @@ Emissions fxcore::Perturb::apply(const ReorderParams& reorder,
   if (held_) {
     if (--wait_ > 0) return {em};
 
-    Emission late{em.due_time, em.sequence, std::move(held_->message)};
+    Emission late{em.due_time, held_->sequence, std::move(held_->message)};
     held_.reset();
     return {em, std::move(late)};
   }
