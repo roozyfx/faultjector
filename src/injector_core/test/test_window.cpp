@@ -15,7 +15,7 @@ TEST(WindowContains, UnsetWindowIsAlwaysOpen) {
 }
 
 TEST(WindowContains, InclusiveAtTimeStart) {
-  const Window w{.start = AtTime{10s}, .end = std::nullopt};
+  const Window w{.start = AtTime{Timestamp{10s}}, .end = std::nullopt};
   const EventTimes map{};
   EXPECT_FALSE(w.contains(Timestamp(10s - 1ns), map));
   EXPECT_TRUE(w.contains(Timestamp(10s), map));
@@ -23,7 +23,7 @@ TEST(WindowContains, InclusiveAtTimeStart) {
 }
 
 TEST(WindowContains, ExclusiveAtTimeEnd) {
-  const Window w{.start = std::nullopt, .end = AtTime{5s}};
+  const Window w{.start = std::nullopt, .end = AtTime{Timestamp{5s}}};
   const EventTimes map{};
   EXPECT_TRUE(w.contains(Timestamp(0s), map));
   EXPECT_TRUE(w.contains(Timestamp(5s - 1ns), map));
@@ -31,7 +31,7 @@ TEST(WindowContains, ExclusiveAtTimeEnd) {
 }
 
 TEST(WindowContains, DurationFromStart) {
-  const Window w{.start = AtTime{10s}, .end = ForDuration{15s}};
+  const Window w{.start = AtTime{Timestamp{10s}}, .end = ForDuration{15s}};
   const EventTimes map{};
   EXPECT_TRUE(w.contains(Timestamp(22s), map));
   EXPECT_FALSE(w.contains(Timestamp(6s), map));
@@ -68,8 +68,9 @@ TEST(WindowContains, AfterEventFromEventTime) {
 }
 
 TEST(WindowContains, AfterEventWithSetEnd) {
-  const Window w{.start = AfterEvent{"robot_burnt", 0s}, .end = AtTime{1min}};
-  const EventTimes map{{"robot_burnt", Timestamp(30s)}};
+  const Window w{.start = AfterEvent{"robot_burnt", 0s},
+                 .end = AtTime{Timestamp{1min}}};
+  const EventTimes map{{"robot_burnt", Timestamp{30s}}};
   EXPECT_FALSE(w.contains(Timestamp(29s), map));
   EXPECT_TRUE(w.contains(Timestamp(30s), map));
   EXPECT_FALSE(w.contains(Timestamp(1min), map));
@@ -77,9 +78,10 @@ TEST(WindowContains, AfterEventWithSetEnd) {
 }
 
 TEST(WindowContains, EndBeforeStartIsEmpty) {
-  const Window w{.start = AtTime{20s}, .end = AtTime{10s}};
+  const Window w{.start = AtTime{Timestamp{20s}},
+                 .end = AtTime{Timestamp{10s}}};
   const EventTimes map{};
-  EXPECT_FALSE(w.contains(Timestamp(4s), map));
-  EXPECT_FALSE(w.contains(Timestamp(7s), map));
-  EXPECT_FALSE(w.contains(Timestamp(12s), map));
+  EXPECT_FALSE(w.contains(Timestamp{4s}, map));
+  EXPECT_FALSE(w.contains(Timestamp{7s}, map));
+  EXPECT_FALSE(w.contains(Timestamp{12s}, map));
 }
