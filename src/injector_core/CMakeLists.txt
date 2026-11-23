@@ -67,7 +67,7 @@ target_include_directories(injector_core PUBLIC
 target_link_libraries(injector_core PRIVATE yaml-cpp::yaml-cpp)
 
 install(TARGETS injector_core EXPORT injector_coreTargets)
-install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/injector_core)
 
 install(EXPORT injector_coreTargets
     FILE injector_coreTargets.cmake
