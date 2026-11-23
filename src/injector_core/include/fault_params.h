@@ -16,7 +16,7 @@ namespace fxcore {
 // variable number of parameters depending on distribution (?!) Delay: hold each
 // Delay: hold each message for mean +/- jitter.
 struct DelayParams {
-  Timestamp mean{};
+  Duration mean{};
   Duration jitter{};
   // Unset: the injector's default distribution.
   std::optional<std::string> distribution;
