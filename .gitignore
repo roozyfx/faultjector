@@ -87,3 +87,6 @@ CMakeLists.txt.user*
 /.cache/
 # Generated Doxygen output
 docs/html/
+
+/.idea/
+/.codegraph/
