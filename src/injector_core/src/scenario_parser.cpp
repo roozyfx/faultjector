@@ -119,12 +119,12 @@ struct convert<WindowEnd> {
 
   static bool decode(const Node& node, WindowEnd& win_end) {
     const bool is_at_time{contains(node, "time")};
-    const bool is_for_duration{contains(node, "duration")};
     if (is_at_time) check_keys(node, {"time"});
+    const bool is_for_duration{contains(node, "duration")};
     if (is_for_duration) check_keys(node, {"duration"});
 
     // nodes
-    if (!node.IsMap() || !(node["duration"] || node["time"])) return false;
+    if (!node.IsMap() || !(is_at_time || is_for_duration)) return false;
 
     if (is_at_time) {
       AtTime at_time;
