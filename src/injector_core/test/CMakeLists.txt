@@ -1,6 +1,3 @@
-find_package(GTest REQUIRED)
-include(GoogleTest)
-
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -14,7 +11,7 @@ set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-MACRO(add_test test_name)
+MACRO(test_set test_name)
   add_executable(${test_name} ${test_name}.cpp)
   target_link_libraries(${test_name} injector_core::injector_core GTest::gtest_main )
   target_include_directories(${test_name} PRIVATE ../include)
@@ -22,5 +19,5 @@ MACRO(add_test test_name)
   gtest_discover_tests(${test_name})
 ENDMACRO()
 
-add_test(test_scenario_parser)
-add_test(test_window)
+test_set(test_scenario_parser)
+test_set(test_window)
