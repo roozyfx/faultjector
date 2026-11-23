@@ -40,36 +40,38 @@ void check_keys(
   }
 }
 
-template <typename T>
-Timestamp parse_time(const YAML::Node& node) {
+Duration parse_duration(const YAML::Node& node, bool is_negative = false) {
   const std::string str{node.as<std::string>()};
-  T value;
-  auto [unit, ec] = std::from_chars(str.data(), str.data() + str.size(), value);
-  if (ec != std::errc()) {
-    throw YAML::RepresentationException(node.Mark(), "invalid value");
+  int64_t value;
+  static constexpr std::pair<std::string_view, int64_t> kUnits[]{
+      {"min", 60'000'000'000},
+      {"s", 1'000'000'000},
+      {"ms", 1'000'000},
+      {"us", 1'000},
+      {"ns", 1}};
+  static constexpr int64_t kMaxNs{
+      std::chrono::nanoseconds{std::chrono::days{365}}.count()};
+  const auto [unit, ec] =
+      std::from_chars(str.data(), str.data() + str.size(), value);
+  // const std::string_view unit{rest, str.data() + str.size()};
+
+  for (const auto& [u, factor] : kUnits) {
+    if (unit == u && ec == std::errc() && (is_negative || value >= 0) &&
+        value <= kMaxNs / factor && value >= -kMaxNs / factor) {
+      return Duration{value * factor};
+    }
   }
-  if (std::strcmp(unit, "min") == 0) {
-    return Timestamp(std::chrono::minutes(value));
-  } else if (std::strcmp(unit, "s") == 0) {
-    return Timestamp(std::chrono::seconds(value));
-  } else if (std::strcmp(unit, "ms") == 0) {
-    return Timestamp(std::chrono::milliseconds(value));
-  } else if (std::strcmp(unit, "us") == 0) {
-    return Timestamp(std::chrono::microseconds(value));
-  } else if (std::strcmp(unit, "ns") == 0) {
-    return Timestamp(std::chrono::nanoseconds(value));
-  }
-  throw YAML::RepresentationException(node.Mark(), "not a valid time format");
+  throw YAML::RepresentationException(node.Mark(), "invalid value");
 }
 
 auto to_timestamp = [](const YAML::Node& node) -> Timestamp {
-  return parse_time<uint64_t>(node);
+  return Timestamp{parse_duration(node)};
 };
 auto to_duration = [](const YAML::Node& node) -> Duration {
-  return parse_time<uint64_t>(node) - Timestamp();
+  return parse_duration(node);
 };
 auto to_time_offset = [](const YAML::Node& node) -> Duration {
-  return parse_time<int64_t>(node) - Timestamp();
+  return parse_duration(node, true);
 };
 
 }  // namespace
