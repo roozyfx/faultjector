@@ -1,7 +1,10 @@
 #include "rng.h"
 
 #include <cmath>  // for std::isnan
+#include <limits>
 #include <stdexcept>
+
+#include "timestamp.h"
 
 using namespace fxcore;
 
@@ -42,23 +45,15 @@ inline T RNG::gaussian(const T& mean, const T& stddev) {
   return in_interval_rnd(std::normal_distribution<T>(mean, stddev));
 }
 
-ns RNG::gaussian(const ns& mean_ns, const ns& stddev_ns) {
+Duration RNG::gaussian(const Duration& mean, const Duration& stddev) {
+  if (stddev < Duration::zero()) {
+    throw std::invalid_argument("'stddev' must be non-negative.");
+  }
   // with standard deviation at 0, fix the return to mean.
-  if (stddev_ns == ns::zero()) return mean_ns;
+  if (stddev == Duration::zero()) return mean;
 
-  const double stddev{static_cast<double>(stddev_ns.count())};
-  if (stddev < 0 || std::isnan(stddev) || !std::isfinite(stddev)) {
-    throw std::invalid_argument("'stddev' must be a positive real number.");
-  }
-
-  const double mean{static_cast<double>(mean_ns.count())};
-  if (std::isnan(mean) || std::isinf(mean)) {
-    throw std::invalid_argument("'mean' must be a finite real number.");
-  }
-
-  const auto rand_d{
-      in_interval_rnd(std::normal_distribution<double>(mean, stddev))};
-  return ns(static_cast<int64_t>(rand_d));
+  return mean + Duration{std::llround(
+                    gaussian(0.0, static_cast<double>(stddev.count())))};
 }
 
 double RNG::random_probability() { return in_interval_uniform(0., 1.); }

@@ -5,6 +5,8 @@
 #include <random>
 #include <type_traits>
 
+#include "timestamp.h"
+
 namespace fxcore {
 
 // roughly what std wants from a distribution
@@ -38,11 +40,8 @@ same seed => same numbers, on the same stdlib
 class RNG {
  public:
   explicit RNG(const uint64_t& seed = 0)
-      : seed_{seed} {
-    std::random_device rd;
-    engine_ = Engine(rd());
-    engine_.seed(seed);
-  }
+      : engine_{seed},
+        seed_{seed} {}
 
   RNG(RNG&&) = default;
   RNG& operator=(RNG&&) = default;
@@ -58,7 +57,7 @@ class RNG {
   T gaussian(const T& mean, const T& stddev);
 
   // gaussian distribution for nanoseconds
-  ns gaussian(const ns& mean_ns, const ns& stddev_ns);
+  Duration gaussian(const Duration& mean, const Duration& stddev);
 
   // [0, 1)
   double random_probability();
