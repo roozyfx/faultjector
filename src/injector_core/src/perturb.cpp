@@ -11,14 +11,8 @@ Emissions fxcore::Perturb::apply(const DelayParams& delay,
                                  const Message& message) {
   ++count_;
   // TODO what if delay.distribution?
-  auto random_ts{rng_.gaussian(delay.mean, delay.jitter)};
 
-  // TODO
-  //  If stddev is close to mean, clamping would be a problem, clamping
-  //  random_ns to 0. If that is a realistic use-case do something else
-  //  instead, e.g. redraw. I found that unrealistic
-  random_ts = std::clamp(random_ts, Timestamp(), Timestamp::max());
-  const Duration random_duration{random_ts - Timestamp()};
+  const Duration random_duration{rng_.gaussian(delay.mean, delay.jitter)};
 
   return {{message.received_time + random_duration, message.sequence,
            message.message}};
