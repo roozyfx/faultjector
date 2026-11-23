@@ -167,10 +167,6 @@ struct convert<Window> {
 
 template <>
 struct convert<Fault> {
- private:
-  static std::unordered_set<std::string> ids;
-
- public:
   static Node encode(const Fault&) {
     Node node;
     // TODO
@@ -183,21 +179,14 @@ struct convert<Fault> {
     // non-existant and it'd still be valid scenario file
     if (!node.IsMap() || !node["id"] || !node["params"]) return false;
 
-    const auto id{node["id"].as<std::string>()};
-    // Check if id is unique
-    if (ids.contains(id)) {
-      throw YAML::InvalidNode("Fault id must be unique. '" + id +
-                              "' has already been used.");
-    }
-    ids.insert(id);
-    fault.id = id;
+    fault.id = node["id"].as<std::string>();
 
     fault.type = node["type"].as<std::string>();
     const auto& params{node["params"]};
     if (fault.type.compare("delay") == 0) {
       check_keys(params, {"mean", "jitter", "distribution"});
       DelayParams p;
-      p.mean = to_timestamp(params["mean"]);
+      p.mean = to_duration(params["mean"]);
       p.jitter = to_duration(params["jitter"]);
       if (params["distribution"])
         p.distribution = params["distribution"].as<std::string>();
@@ -264,7 +253,6 @@ struct convert<Fault> {
     return true;
   }
 };
-std::unordered_set<std::string> YAML::convert<fxcore::Fault>::ids = {};
 
 template <>
 struct convert<Injection> {
@@ -302,6 +290,16 @@ std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
     scenario.seed = root["seed"].as<uint64_t>();
     scenario.timeout = to_duration(root["timeout"]);
     scenario.injections = root["injections"].as<Injections>();
+    // Check if ids are unique
+    std::unordered_set<std::string> ids;
+    for (const auto& inj : scenario.injections)
+      for (const auto& fault : inj.faults) {
+        if (ids.contains(fault.id)) {
+          return std::unexpected(std::format(
+              "fault id '{}' is already used. id must be unique.", fault.id));
+        }
+        ids.insert(fault.id);
+      }
     scenario.record = root["record"].as<std::vector<std::string>>();
     // FIXME missing YAML decoder for assertion
     // scenario.assert = root["assert"].as<Assertion>();
