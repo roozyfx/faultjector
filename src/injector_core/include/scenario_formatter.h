@@ -3,60 +3,66 @@
 #include <format>
 
 #include "scenario.h"
+#include "timestamp.h"
 
-using namespace fxcore;
 /* Formatter for Scenario type, so that std::print/ln can show the output easily
 and cleanly.
 TODO: Since it is only needed for test purposes, is still (And probably stays!)
 in an incomplete state, until necessity asks for it! With the same reason, it
 can be removed from the project.
 */
+
 template <>
-struct std::formatter<Scenario> : public std::formatter<std::string> {
-  auto format(const Scenario& scenario, std::format_context& ctx) const {
+struct std::formatter<fxcore::Scenario> : public std::formatter<std::string> {
+  auto format(const fxcore::Scenario& scenario,
+              std::format_context& ctx) const {
     auto out{ctx.out()};
-    std::format_to(ctx.out(), "name: {}\n", scenario.name);
-    std::format_to(ctx.out(), "seed: {}\n", scenario.seed);
-    std::format_to(ctx.out(), "timeout: {}\n", scenario.timeout);
-    std::format_to(ctx.out(), "Injections: [\n");
+    std::format_to(out, "name: {}\n", scenario.name);
+    std::format_to(out, "seed: {}\n", scenario.seed);
+    std::format_to(out, "timeout: {}\n", scenario.timeout);
+    std::format_to(out, "Injections: [\n");
     for (const auto& injection : scenario.injections) {
-      std::format_to(ctx.out(), "\ttopic: {}\n", injection.topic);
-      std::format_to(ctx.out(), "\tsource: {}\n", injection.source);
-      std::format_to(ctx.out(), "\tfaults: [\n");
+      std::format_to(out, "\ttopic: {}\n", injection.topic);
+      std::format_to(out, "\tsource: {}\n", injection.source);
+      std::format_to(out, "\tfaults: [\n");
       for (auto const& fault : injection.faults) {
-        std::format_to(ctx.out(), "\tid: {}\n", fault.id);
-        std::format_to(ctx.out(), "\ttype: {}\n", fault.type);
-        std::format_to(ctx.out(), "\tparams: // TODO\n");
-        std::format_to(ctx.out(), "\twindow: \n");
+        std::format_to(out, "\tid: {}\n", fault.id);
+        std::format_to(out, "\ttype: {}\n", fault.type);
+        std::format_to(out, "\tparams: // TODO\n");
+        std::format_to(out, "\twindow: \n");
         if (fault.window.start.has_value()) {
-          std::format_to(ctx.out(), "\t\tstart: [");
+          std::format_to(out, "\t\tstart: [");
           auto start = fault.window.start.value();
-          if (const auto* at_time = std::get_if<AtTime>(&start))
-            std::format_to(ctx.out(), "at: {}{}", (*at_time).time, "]\n");
-          if (const AfterEvent* after_event = std::get_if<AfterEvent>(&start))
-            std::format_to(ctx.out(), "event: {}, after: {}{}",
-                           (*after_event).event, (*after_event).after, "]\n");
+          if (const auto* at_time = std::get_if<fxcore::AtTime>(&start))
+            std::format_to(out, "at: {}{}", (*at_time).time.time_since_epoch(),
+                           "]\n");
+          if (const fxcore::AfterEvent* after_event =
+                  std::get_if<fxcore::AfterEvent>(&start))
+            std::format_to(out, "event: {}, after: {}{}", (*after_event).event,
+                           (*after_event).after.count(), "]\n");
         }
         if (fault.window.end.has_value()) {
-          std::format_to(ctx.out(), "\t\tend: [");
+          std::format_to(out, "\t\tend: [");
           auto end = fault.window.end.value();
-          if (const auto* at_time = std::get_if<AtTime>(&end))
-            std::format_to(ctx.out(), "at: {}{}", (*at_time).time, "]\n");
-          if (const ForDuration* for_duration = std::get_if<ForDuration>(&end))
-            std::format_to(ctx.out(), "duration: {}{}",
-                           (*for_duration).duration, "]\n");
+          if (const auto* at_time = std::get_if<fxcore::AtTime>(&end))
+            std::format_to(out, "at: {}{}", (*at_time).time.time_since_epoch(),
+                           "]\n");
+          if (const fxcore::ForDuration* for_duration =
+                  std::get_if<fxcore::ForDuration>(&end))
+            std::format_to(out, "duration: {}{}",
+                           (*for_duration).duration.count(), "]\n");
         }
       }
     }
-    std::format_to(ctx.out(), "\n");
+    std::format_to(out, "\n");
 
-    std::format_to(ctx.out(), "record: [");
+    std::format_to(out, "record: [");
     for (const auto& entry : scenario.record) {
-      std::format_to(ctx.out(), "{}, ", entry);
+      std::format_to(out, "{}, ", entry);
     }
-    std::format_to(ctx.out(), "]");
+    std::format_to(out, "]");
 
-    return ctx.out();
+    return out;
   }
 };
 
