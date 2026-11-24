@@ -7,10 +7,8 @@ include(CMakePackageConfigHelpers)
 find_package(yaml-cpp REQUIRED)
 
 set (SRC
-    src/perturb.cpp
+    src/explicit_instantiation.cpp
     src/rng.cpp
-    src/fault_pipe.cpp
-    src/message.cpp
     src/scenario_parser.cpp
     src/window.cpp
     )
@@ -22,18 +20,18 @@ set_target_properties(injector_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # Linux and macOS
 if(CMAKE_SYSTEM_NAME MATCHES Linux OR CMAKE_SYSTEM_NAME MATCHES Darwin)
-    target_compile_options(injector_core PRIVATE
+    target_compile_options(injector_core INTERFACE
         $<$<CONFIG:Debug>:-g;-O0;-fsanitize=address,undefined;-Wall;-Wfloat-equal;-Wmissing-declarations;-fno-omit-frame-pointer>
         $<$<CONFIG:Release>:-O3>
     )
     # GCC
     if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-        target_compile_options(injector_core PRIVATE
+        target_compile_options(injector_core INTERFACE
             -Wall -Wextra -Wpedantic
         )
     # Clang
     elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES AppleClang)
-        target_compile_options(injector_core PRIVATE
+        target_compile_options(injector_core INTERFACE
             -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-weak-vtables -Wno-c++20-extensions -Wno-padded
             # TODO remove and fix warnings
             -Wno-unsafe-buffer-usage
@@ -46,7 +44,7 @@ if(CMAKE_SYSTEM_NAME MATCHES Linux OR CMAKE_SYSTEM_NAME MATCHES Darwin)
 
     # Windows branch
 elseif(CMAKE_SYSTEM_NAME MATCHES Windows)
-    target_compile_options(injector_core PRIVATE
+    target_compile_options(injector_core INTERFACE
         /W4 /permissive-
         $<$<CONFIG:Debug>:/Od;/Zi;/fsanitize=address>
         $<$<CONFIG:Release>:/O2;/DNDEBUG>
