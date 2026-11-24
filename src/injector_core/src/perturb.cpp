@@ -28,10 +28,8 @@ Emissions fxcore::Perturb::apply(const DropParams& drop,
       return {};
     }
     ++count_;
-  }
-
-  // This is the n'th message, drop it and reset the counter
-  if (drop.every_nth && ++count_ % *drop.every_nth == 0) {
+  } else if (drop.every_nth &&
+             ++count_ % *drop.every_nth == 0) {  // drop the nth message
     return {};
   }
 

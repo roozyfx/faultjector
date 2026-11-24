@@ -5,7 +5,6 @@
 
 #include <chrono>
 #include <cstdint>
-#include <cstring>
 #include <expected>
 #include <string>
 #include <string_view>
@@ -165,7 +164,7 @@ struct convert<Window> {
 
     return true;
   }
-};  // namespace YAML
+};
 
 template <>
 struct convert<Fault> {

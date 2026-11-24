@@ -2,6 +2,7 @@
 #define INJECTOR_CORE_INCLUDE_FAULT_PARAMS_H_
 
 #include <optional>
+#include <string>
 #include <variant>
 
 #include "probability.h"

@@ -1,6 +1,5 @@
 #ifndef INJECTOR_CORE_INCLUDE_RNG_H_
 #define INJECTOR_CORE_INCLUDE_RNG_H_
-#include <chrono>
 #include <concepts>
 #include <random>
 #include <type_traits>
@@ -29,7 +28,6 @@ concept numerics =
     !any_of_types<std::remove_cv_t<T>, bool, char, signed char, unsigned char,
                   wchar_t, char8_t, char16_t, char32_t>;
 
-using ns = std::chrono::nanoseconds;
 // To make it easier to change if desired. But not as template parameter,
 // since it doesn't make sense in this project
 using Engine = std::mt19937_64;
@@ -52,17 +50,16 @@ class RNG {
 
   inline uint64_t seed() const { return seed_; }
 
-  // gaussian distribution for floating_point numbers
-  template <std::floating_point T>
-  T gaussian(const T& mean, const T& stddev);
-
   // gaussian distribution for nanoseconds
   Duration gaussian(const Duration& mean, const Duration& stddev);
 
-  // [0, 1)
+  // [0, 1]
   double random_probability();
 
  private:
+  // gaussian distribution for floating_point numbers
+  template <std::floating_point T>
+  T gaussian(const T& mean, const T& stddev);
   // ints/reals uniform distribution over [low, high]
   template <numerics T>
   T in_interval_uniform(const T& low, const T& high);

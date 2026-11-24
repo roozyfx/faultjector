@@ -32,4 +32,4 @@ class Perturb {
   Emissions apply(const ClockSkewParams& clock_skew, const Message& message);
 };
 }  // namespace fxcore
-#endif  // INJECTOR_CORE_INCLUDE_PERTURB_HPP_
+#endif  // INJECTOR_CORE_INCLUDE_PERTURB_H_
