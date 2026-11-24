@@ -1,0 +1,51 @@
+name: injector_core
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/injector_core/**
+      - .github/workflows/injector_core.yml
+  pull_request:
+    paths:
+      - src/injector_core/**
+      - .github/workflows/injector_core.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build and test (Ubuntu 26.04, GCC, Debug + sanitizers)
+    runs-on: ubuntu-latest
+    # A bare image, so the job only passes if the packages below are enough to
+    # build injector_core on its own: no ROS and nothing preinstalled on the
+    # runner. 26.04 because the code needs GCC 15 (C++23 container
+    # insert_range); 24.04 ships GCC 13 and 14.
+    container: ubuntu:26.04
+    timeout-minutes: 20
+    env:
+      DEBIAN_FRONTEND: noninteractive
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends \
+            ca-certificates cmake g++ libyaml-cpp-dev make
+
+      - uses: actions/checkout@v5
+
+      # Debug turns on -Wall and AddressSanitizer/UBSan (see CMakeLists.txt).
+      # GoogleTest is fetched at configure time, hence ca-certificates.
+      - name: Configure
+        run: >
+          cmake -S src/injector_core -B build
+          -DCMAKE_BUILD_TYPE=Debug
+          -DINJECTOR_CORE_BUILD_TESTS=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
