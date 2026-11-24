@@ -1,0 +1,59 @@
+CompileFlags:
+  # Uncomment if compile_commands.json lives in build/ instead of the root
+  # CompilationDatabase: build
+
+Diagnostics:
+  # clangd's own include-cleaner (include-what-you-use style)
+  UnusedIncludes: Strict      # flag #includes whose symbols aren't used
+  MissingIncludes: Strict     # flag symbols used only via transitive includes
+  Includes:
+    # Headers that should never be reported as unused (regex on the path)
+    IgnoreHeader:
+      - ".*_generated\\.h"
+      # - "gtest/.*"
+
+  ClangTidy:
+    # FastCheckFilter: Strict   # default: skip checks known to be slow
+
+    Add:
+      - bugprone-*
+      - cert-*
+      - clang-analyzer-*
+      - cppcoreguidelines-*
+      - misc-*
+      - modernize-*
+      - performance-*
+      - portability-*
+      - readability-*
+
+    Remove:
+      # Already covered by UnusedIncludes/MissingIncludes above (avoids duplicate warnings)
+      - misc-include-cleaner
+
+      # Style preferences / noisy
+      - modernize-use-trailing-return-type
+      - modernize-use-nodiscard
+      - readability-identifier-length
+      - readability-magic-numbers
+      - cppcoreguidelines-avoid-magic-numbers
+      - readability-uppercase-literal-suffix
+      - bugprone-easily-swappable-parameters
+      - misc-non-private-member-variables-in-classes
+      - cppcoreguidelines-non-private-member-variables-in-classes
+      - misc-no-recursion
+
+      # Overlaps / aliases that double-report
+      - cert-err58-cpp
+      - cppcoreguidelines-avoid-c-arrays     # same as modernize-avoid-c-arrays
+      - cppcoreguidelines-macro-usage
+
+    CheckOptions:
+      readability-function-cognitive-complexity.Threshold: 25
+      readability-braces-around-statements.ShortStatementLines: 2
+      cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor: true
+      performance-unnecessary-value-param.AllowedTypes: "std::shared_ptr;std::function"
+
+InlayHints:
+  Enabled: true
+  ParameterNames: true
+  DeducedTypes: true
