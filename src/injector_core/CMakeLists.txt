@@ -91,3 +91,13 @@ if(INJECTOR_CORE_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
 endif()
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+# To enable clangd to find the compile_commands.json file
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+  file(CREATE_LINK
+    ${CMAKE_BINARY_DIR}/compile_commands.json
+    ${CMAKE_SOURCE_DIR}/compile_commands.json
+    SYMBOLIC
+  )
+endif()
