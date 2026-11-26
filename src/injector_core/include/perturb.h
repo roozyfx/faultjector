@@ -1,6 +1,7 @@
 #ifndef INJECTOR_CORE_INCLUDE_PERTURB_H_
 #define INJECTOR_CORE_INCLUDE_PERTURB_H_
-
+#include <cstddef>
+#include <cstdint>
 #include <optional>
 #include <utility>
 #include <vector>
@@ -36,7 +37,7 @@ class Perturb {
   Emissions<P> apply(const ClockSkewParams& clock_skew,
                      const Message<P>& message);
 
-  inline std::optional<Emission<P>> release() {
+  std::optional<Emission<P>> release() {
     wait_ = 0;
     return std::exchange(held_, std::nullopt);
   }
@@ -60,7 +61,7 @@ Emissions<P> fxcore::Perturb<P>::apply(const DelayParams& delay,
 template <Payload P>
 Emissions<P> fxcore::Perturb<P>::apply(const DropParams& drop,
                                        const Message<P>& message) {
-  Emission unperturbed{to_emission(message)};
+  Emission<P> unperturbed{to_emission(message)};
 
   if (drop.probability) {
     const auto random_number{rng_.random_probability()};
@@ -97,7 +98,7 @@ Emissions<P> fxcore::Perturb<P>::apply(const DuplicateParams& duplicate,
 template <Payload P>
 Emissions<P> fxcore::Perturb<P>::apply(const ReorderParams& reorder,
                                        const Message<P>& message) {
-  Emission em{to_emission(message)};
+  Emission<P> em{to_emission(message)};
 
   const auto random_number{rng_.random_probability()};
   if (held_) {

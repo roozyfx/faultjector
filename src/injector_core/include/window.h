@@ -10,7 +10,7 @@
 namespace fxcore {
 
 struct AtTime {
-  Timestamp time{};
+  Timestamp time;
 };
 
 struct AfterEvent {
@@ -35,10 +35,10 @@ struct Window {
    * @brief If the given Timestamp is within this Window
    *
    * @param ts Enquired Timestamp
-   * @param map Map of events and their timestamp
+   * @param events Map of events and their timestamp
    * @return true if is within this Window and false otherwise.
    */
-  bool contains(const Timestamp& ts, const EventTimes& map) const;
+  bool contains(const Timestamp& ts, const EventTimes& events) const;
 
  private:
   // Helper for contains to resolve the start of current window

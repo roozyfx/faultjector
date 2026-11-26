@@ -1,9 +1,12 @@
 #ifndef INJECTOR_CORE_INCLUDE_FAULT_PIPE_H_
 #define INJECTOR_CORE_INCLUDE_FAULT_PIPE_H_
+#include <cstdint>
 #include <optional>
 #include <set>
+#include <string>  // for std::hash
 #include <vector>
 
+#include "events.h"
 #include "fault.h"
 #include "message.h"
 #include "perturb.h"
@@ -68,9 +71,7 @@ class FaultPipe {
     emissions_.insert_range(working);
   }
 
-  inline const std::multiset<Emission<P>>& emissions() const {
-    return emissions_;
-  }
+  const std::multiset<Emission<P>>& emissions() const { return emissions_; }
 
   std::vector<Message<P>> flush(const Timestamp& now) {
     std::vector<Message<P>> result;

@@ -1,10 +1,10 @@
 #include "window.h"
 
 #include <optional>
+#include <variant>
 
+#include "events.h"
 #include "timestamp.h"
-
-using namespace std::chrono_literals;
 
 namespace {
 template <class... Ts>
@@ -15,7 +15,7 @@ struct overloaded : Ts... {
 
 std::optional<fxcore::Timestamp> fxcore::Window::handle_start(
     const EventTimes& events) const {
-  if (!start) return Timestamp(0ns);
+  if (!start) return time_zero;
 
   return std::visit(
       overloaded{
@@ -23,9 +23,8 @@ std::optional<fxcore::Timestamp> fxcore::Window::handle_start(
           [&](const AfterEvent& e) -> std::optional<Timestamp> {
             if (events.contains(e.event)) {
               return events.at(e.event) + e.after;
-            } else {
-              return std::nullopt;
             }
+            return std::nullopt;
           }},
       *start);
 }

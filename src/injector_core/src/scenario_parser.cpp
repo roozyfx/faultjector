@@ -3,15 +3,28 @@
 #include <yaml-cpp/exceptions.h>
 #include <yaml-cpp/node/convert.h>
 
+#include <algorithm>
+#include <charconv>  // for from_chars
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
+#include <exception>
 #include <expected>
+#include <format>
+#include <initializer_list>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 
 #include "fault.h"
+#include "fault_params.h"
+#include "injection.h"
 #include "probability.h"
+#include "scenario.h"
 #include "timestamp.h"
 #include "window.h"
 #include "yaml-cpp/yaml.h"
@@ -40,7 +53,7 @@ void check_keys(
 
 Duration parse_duration(const YAML::Node& node, bool is_negative = false) {
   const std::string str{node.as<std::string>()};
-  int64_t value;
+  int64_t value{};
   static constexpr std::pair<std::string_view, int64_t> kUnits[]{
       {"min", 60'000'000'000},
       {"s", 1'000'000'000},
@@ -62,13 +75,13 @@ Duration parse_duration(const YAML::Node& node, bool is_negative = false) {
   throw YAML::RepresentationException(node.Mark(), "invalid value");
 }
 
-auto to_timestamp = [](const YAML::Node& node) -> Timestamp {
+const auto to_timestamp = [](const YAML::Node& node) -> Timestamp {
   return Timestamp{parse_duration(node)};
 };
-auto to_duration = [](const YAML::Node& node) -> Duration {
+const auto to_duration = [](const YAML::Node& node) -> Duration {
   return parse_duration(node);
 };
-auto to_time_offset = [](const YAML::Node& node) -> Duration {
+const auto to_time_offset = [](const YAML::Node& node) -> Duration {
   return parse_duration(node, true);
 };
 
@@ -77,7 +90,7 @@ auto to_time_offset = [](const YAML::Node& node) -> Duration {
 namespace YAML {
 template <>
 struct convert<WindowStart> {
-  static Node encode(const WindowStart&) {
+  static Node encode(const WindowStart& w [[maybe_unused]]) {
     // TODO
     Node node;
     return node;
@@ -111,7 +124,7 @@ struct convert<WindowStart> {
 
 template <>
 struct convert<WindowEnd> {
-  static Node encode(const WindowEnd&) {
+  static Node encode(const WindowEnd& w [[maybe_unused]]) {
     // TODO
     Node node;
     return node;
@@ -142,7 +155,7 @@ struct convert<WindowEnd> {
 
 template <>
 struct convert<Window> {
-  static Node encode(const Window&) {
+  static Node encode(const Window& w [[maybe_unused]]) {
     // TODO
     Node node;
     return node;
@@ -167,7 +180,7 @@ struct convert<Window> {
 
 template <>
 struct convert<Fault> {
-  static Node encode(const Fault&) {
+  static Node encode(const Fault& f [[maybe_unused]]) {
     Node node;
     // TODO
     return node;
@@ -183,54 +196,60 @@ struct convert<Fault> {
 
     fault.type = node["type"].as<std::string>();
     const auto& params{node["params"]};
-    if (fault.type.compare("delay") == 0) {
+    if (fault.type == "delay") {
       check_keys(params, {"mean", "jitter", "distribution"});
       DelayParams p;
       p.mean = to_duration(params["mean"]);
       p.jitter = to_duration(params["jitter"]);
-      if (params["distribution"])
+      if (params["distribution"]) {
         p.distribution = params["distribution"].as<std::string>();
-      else
+      } else {
         p.distribution = std::nullopt;
+      }
 
       fault.params = p;
-    } else if (fault.type.compare("drop") == 0) {
+    } else if (fault.type == "drop") {
       check_keys(params, {"probability", "every_nth"});
-      if (params["probability"] && params["every_nth"])
+      if (params["probability"] && params["every_nth"]) {
         throw YAML::InvalidNode(
             "Only one of 'probability' and 'every_nth' should be set.");
-      if (!params["probability"] && !params["every_nth"])
+      }
+      if (!params["probability"] && !params["every_nth"]) {
         throw YAML::InvalidNode(
             "One of 'probability' or 'every_nth' should be set.");
+      }
 
       DropParams p;
-      if (params["probability"])
+      if (params["probability"]) {
         p.probability = Probability(params["probability"].as<double>());
+      }
       if (params["every_nth"]) {
         p.every_nth = params["every_nth"].as<uint64_t>();
-        if (p.every_nth == 0)
+        if (p.every_nth == 0) {
           throw YAML::RepresentationException(node.Mark(),
                                               "Should be a positive integer.");
+        }
       }
       fault.params = p;
-    } else if (fault.type.compare("duplicate") == 0) {
+    } else if (fault.type == "duplicate") {
       check_keys(params, {"probability", "spacing"});
       DuplicateParams p;
       p.probability = Probability(params["probability"].as<double>());
       p.spacing = to_duration(params["spacing"]);
 
       fault.params = p;
-    } else if (fault.type.compare("reorder") == 0) {
+    } else if (fault.type == "reorder") {
       check_keys(params, {"window_size", "probability"});
       ReorderParams p;
       p.window_size = params["window_size"].as<size_t>();
-      if (p.window_size < 2)
+      if (p.window_size < 2) {
         throw YAML::RepresentationException(
             node.Mark(), "Value should be greater than or equal to 2");
+      }
       p.probability = Probability(params["probability"].as<double>());
 
       fault.params = p;
-    } else if (fault.type.compare("clock_skew") == 0) {
+    } else if (fault.type == "clock_skew") {
       check_keys(params, {"offset"});
       ClockSkewParams p;
       p.offset = to_time_offset(params["offset"]);
@@ -292,7 +311,7 @@ std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
     scenario.injections = root["injections"].as<Injections>();
     // Check if ids are unique
     std::unordered_set<std::string> ids;
-    for (const auto& inj : scenario.injections)
+    for (const auto& inj : scenario.injections) {
       for (const auto& fault : inj.faults) {
         if (ids.contains(fault.id)) {
           return std::unexpected(std::format(
@@ -300,6 +319,7 @@ std::expected<Scenario, std::string> parse_root(const YAML::Node& root) {
         }
         ids.insert(fault.id);
       }
+    }
     scenario.record = root["record"].as<std::vector<std::string>>();
     // FIXME missing YAML decoder for assertion
     // scenario.assert = root["assert"].as<Assertion>();
