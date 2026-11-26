@@ -6,10 +6,12 @@
 
 using namespace std::chrono_literals;
 
+namespace {
 template <class... Ts>
 struct overloaded : Ts... {
   using Ts::operator()...;
 };
+}  // namespace
 
 std::optional<fxcore::Timestamp> fxcore::Window::handle_start(
     const EventTimes& events) const {
