@@ -45,6 +45,11 @@ class FaultPipe {
       for (auto& em : working) {
         // Outside of the fault's window, passes through
         if (!stage.fault.window.contains(em.due_time, events_map)) {
+          // release any held message, if any
+          if (auto held = stage.perturb.release()) {
+            next.push_back(
+                {em.due_time, held->sequence, std::move(held->payload)});
+          }
           // 'working' is substituted by 'next' later, so it's safe to move(em)
           next.push_back(std::move(em));
           continue;

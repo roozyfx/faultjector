@@ -2,6 +2,7 @@
 #define INJECTOR_CORE_INCLUDE_PERTURB_H_
 
 #include <optional>
+#include <utility>
 #include <vector>
 
 #include "fault_params.h"
@@ -33,6 +34,11 @@ class Perturb {
   Emissions<P> apply(const ReorderParams& reorder, const Message<P>& message);
   Emissions<P> apply(const ClockSkewParams& clock_skew,
                      const Message<P>& message);
+
+  inline std::optional<Emission<P>> release() {
+    wait_ = 0;
+    return std::exchange(held_, std::nullopt);
+  }
 };
 
 template <Payload P>
