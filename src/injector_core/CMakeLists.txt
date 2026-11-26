@@ -13,47 +13,51 @@ set (SRC
     src/window.cpp
     )
 
+option(INJECTOR_CORE_SANITIZE
+    "Build injector_core and its tests with AddressSanitizer and UBSan" OFF)
+
+# Warnings, and sanitizers when INJECTOR_CORE_SANITIZE is ON, for the code this
+# project builds: the library and its tests. They are PRIVATE so they never
+# reach injector_node or the exported target. Optimisation is left to
+# CMAKE_BUILD_TYPE (Debug: -g, Release: -O3 -DNDEBUG or /O2 /DNDEBUG).
+function(injector_core_target_options target)
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /W4 /permissive-)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang) # Clang and AppleClang
+        target_compile_options(${target} PRIVATE
+            -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic
+            -Wno-weak-vtables -Wno-c++20-extensions -Wno-padded
+            # TODO remove and fix warnings
+            -Wno-unsafe-buffer-usage
+        )
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+        target_compile_options(${target} PRIVATE
+            -Wall -Wextra -Wpedantic -Wfloat-equal -Wmissing-declarations
+        )
+    endif()
+
+    if(INJECTOR_CORE_SANITIZE)
+        if(MSVC)
+            target_compile_options(${target} PRIVATE /fsanitize=address)
+            # MSVC AddressSanitizer requires incremental linking to be disabled
+            target_link_options(${target} PRIVATE /INCREMENTAL:NO)
+        else()
+            target_compile_options(${target} PRIVATE
+                -fsanitize=address,undefined -fno-omit-frame-pointer)
+            target_link_options(${target} PRIVATE -fsanitize=address,undefined)
+        endif()
+    endif()
+endfunction()
+
 add_library(injector_core ${SRC} )
 
 add_library(injector_core::injector_core ALIAS injector_core)
 set_target_properties(injector_core PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-# Linux and macOS
-if(CMAKE_SYSTEM_NAME MATCHES Linux OR CMAKE_SYSTEM_NAME MATCHES Darwin)
-    target_compile_options(injector_core INTERFACE
-        $<$<CONFIG:Debug>:-g;-O0;-fsanitize=address,undefined;-Wall;-Wfloat-equal;-Wmissing-declarations;-fno-omit-frame-pointer>
-        $<$<CONFIG:Release>:-O3>
-    )
-    # GCC
-    if(CMAKE_CXX_COMPILER_ID MATCHES GNU)
-        target_compile_options(injector_core INTERFACE
-            -Wall -Wextra -Wpedantic
-        )
-    # Clang
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES Clang OR CMAKE_CXX_COMPILER_ID MATCHES AppleClang)
-        target_compile_options(injector_core INTERFACE
-            -Weverything -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-weak-vtables -Wno-c++20-extensions -Wno-padded
-            # TODO remove and fix warnings
-            -Wno-unsafe-buffer-usage
-        )
-    endif()
-
-    target_link_options(injector_core PUBLIC
-        $<$<CONFIG:Debug>:-fsanitize=address,undefined>
-    )
-
-    # Windows branch
-elseif(CMAKE_SYSTEM_NAME MATCHES Windows)
-    target_compile_options(injector_core INTERFACE
-        /W4 /permissive-
-        $<$<CONFIG:Debug>:/Od;/Zi;/fsanitize=address>
-        $<$<CONFIG:Release>:/O2;/DNDEBUG>
-    )
-
-    target_link_options(injector_core PUBLIC
-        # MSVC AddressSanitizer requires incremental linking to be disabled
-        $<$<CONFIG:Debug>:/INCREMENTAL:NO>
-    )
+injector_core_target_options(injector_core)
+if(INJECTOR_CORE_SANITIZE AND NOT MSVC)
+    # An instrumented library needs the sanitizer runtime in whatever links it.
+    target_link_options(injector_core INTERFACE -fsanitize=address,undefined)
 endif()
 
 target_compile_features(injector_core PUBLIC cxx_std_23) # Require C++23

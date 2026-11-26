@@ -36,13 +36,15 @@ jobs:
 
       - uses: actions/checkout@v5
 
-      # Debug turns on -Wall and AddressSanitizer/UBSan (see CMakeLists.txt).
-      # GoogleTest is fetched at configure time, hence ca-certificates.
+      # INJECTOR_CORE_SANITIZE turns on AddressSanitizer/UBSan (see
+      # CMakeLists.txt). GoogleTest is fetched at configure time, hence
+      # ca-certificates.
       - name: Configure
         run: >
           cmake -S src/injector_core -B build
           -DCMAKE_BUILD_TYPE=Debug
           -DINJECTOR_CORE_BUILD_TESTS=ON
+          -DINJECTOR_CORE_SANITIZE=ON
 
       - name: Build
         run: cmake --build build --parallel
