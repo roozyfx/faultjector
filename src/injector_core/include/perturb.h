@@ -8,6 +8,7 @@
 #include "fault_params.h"
 #include "message.h"
 #include "rng.h"
+#include "timestamp.h"
 
 namespace fxcore {
 template <Payload P>
@@ -47,7 +48,10 @@ Emissions<P> fxcore::Perturb<P>::apply(const DelayParams& delay,
   ++count_;
   // TODO what if delay.distribution?
 
-  const Duration random_duration{rng_.gaussian(delay.mean, delay.jitter)};
+  Duration random_duration{rng_.gaussian(delay.mean, delay.jitter)};
+  while (random_duration < zero_duration) {
+    random_duration = rng_.gaussian(delay.mean, delay.jitter);
+  }
 
   return {{message.received_time + random_duration, message.sequence,
            message.payload}};
