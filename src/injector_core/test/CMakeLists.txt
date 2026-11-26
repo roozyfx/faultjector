@@ -22,3 +22,8 @@ ENDMACRO()
 
 test_set(test_scenario_parser)
 test_set(test_window)
+test_set(test_probability)
+test_set(test_rng)
+test_set(test_message)
+test_set(test_perturb)
+test_set(test_fault_pipe)

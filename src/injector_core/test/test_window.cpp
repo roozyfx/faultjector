@@ -77,6 +77,32 @@ TEST(WindowContains, AfterEventWithSetEnd) {
   EXPECT_FALSE(w.contains(Timestamp(60s), map));
 }
 
+TEST(WindowContains, AtTimeStartAndAtTimeEnd) {
+  const Window w{.start = AtTime{Timestamp{10s}},
+                 .end = AtTime{Timestamp{20s}}};
+  const EventTimes map{};
+  EXPECT_FALSE(w.contains(Timestamp{10s - 1ns}, map));
+  EXPECT_TRUE(w.contains(Timestamp{10s}, map));
+  EXPECT_TRUE(w.contains(Timestamp{20s - 1ns}, map));
+  EXPECT_FALSE(w.contains(Timestamp{20s}, map));
+}
+
+TEST(WindowContains, AfterEventWithoutEndStaysOpen) {
+  const Window w{.start = AfterEvent{"go", 2s}, .end = std::nullopt};
+  const EventTimes map{{"go", Timestamp{1s}}};
+  EXPECT_FALSE(w.contains(Timestamp{3s - 1ns}, map));
+  EXPECT_TRUE(w.contains(Timestamp{3s}, map));
+  EXPECT_TRUE(w.contains(Timestamp{1h}, map));
+}
+
+TEST(WindowContains, ZeroDurationIsEmpty) {
+  const Window w{.start = AtTime{Timestamp{10s}}, .end = ForDuration{0s}};
+  const EventTimes map{};
+  EXPECT_FALSE(w.contains(Timestamp{10s - 1ns}, map));
+  EXPECT_FALSE(w.contains(Timestamp{10s}, map));
+  EXPECT_FALSE(w.contains(Timestamp{10s + 1ns}, map));
+}
+
 TEST(WindowContains, EndBeforeStartIsEmpty) {
   const Window w{.start = AtTime{Timestamp{20s}},
                  .end = AtTime{Timestamp{10s}}};
