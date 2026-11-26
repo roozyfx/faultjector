@@ -9,7 +9,6 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
-#include <utility>  // for std::unreachable
 
 #include "fault.h"
 #include "probability.h"
@@ -322,5 +321,4 @@ std::expected<Scenario, std::string> fxcore::parse_scenario(
   } catch (const std::exception& e) {
     return std::unexpected(std::format("{}", e.what()));
   }
-  std::unreachable();
 }
