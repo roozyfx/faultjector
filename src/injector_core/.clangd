@@ -1,6 +1,7 @@
-CompileFlags:
-  # Uncomment if compile_commands.json lives in build/ instead of the root
-  # CompilationDatabase: build
+# Uncomment both lines if compile_commands.json lives in build/ instead of the root
+# (an empty "CompileFlags:" is YAML null, which clangd rejects)
+# CompileFlags:
+#   CompilationDatabase: build
 
 Diagnostics:
   # clangd's own include-cleaner (include-what-you-use style)
