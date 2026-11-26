@@ -14,7 +14,8 @@ struct SimClock {
 
 using Timestamp = SimClock::time_point;
 using Duration = SimClock::duration;
-static constexpr Timestamp time_zero = Timestamp{Duration{0}};
+inline constexpr Timestamp time_zero = Timestamp{Duration{0}};
+inline constexpr Duration zero_duration = Duration{0};
 
 }  // namespace fxcore
 #endif  // INJECTOR_CORE_INCLUDE_TIMESTAMP_H_
